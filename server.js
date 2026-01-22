@@ -62,6 +62,48 @@ function adminAuth(req, res, next) {
     }
 }
 
+// Event name filters
+const EVENT_FILTERS = {
+    'blessthun.ics': 'BlessThun',
+    'youth.ics': 'Youth Revival'
+};
+
+// Filter iCal data to only include matching events
+function filterIcalEvents(icalData, filterText) {
+    if (!filterText) return icalData;
+    
+    const lines = icalData.split(/\r\n|\n|\r/);
+    const outputLines = [];
+    let inEvent = false;
+    let currentEventLines = [];
+    let currentEventSummary = '';
+    
+    for (const line of lines) {
+        if (line === 'BEGIN:VEVENT') {
+            inEvent = true;
+            currentEventLines = [line];
+            currentEventSummary = '';
+        } else if (line === 'END:VEVENT') {
+            currentEventLines.push(line);
+            // Check if this event matches the filter
+            if (currentEventSummary.includes(filterText)) {
+                outputLines.push(...currentEventLines);
+            }
+            inEvent = false;
+            currentEventLines = [];
+        } else if (inEvent) {
+            currentEventLines.push(line);
+            if (line.startsWith('SUMMARY')) {
+                currentEventSummary = line.split(':').slice(1).join(':');
+            }
+        } else {
+            outputLines.push(line);
+        }
+    }
+    
+    return outputLines.join('\r\n');
+}
+
 // Fetch a single calendar
 async function fetchCalendar(url, filename) {
     if (!url) {
@@ -82,10 +124,19 @@ async function fetchCalendar(url, filename) {
             throw new Error(`HTTP ${response.status}`);
         }
         
-        const data = await response.text();
+        let data = await response.text();
         
         if (!data.includes('BEGIN:VCALENDAR')) {
             throw new Error('Invalid iCal data');
+        }
+        
+        // Filter events by name
+        const filterText = EVENT_FILTERS[filename];
+        if (filterText) {
+            const originalCount = (data.match(/BEGIN:VEVENT/g) || []).length;
+            data = filterIcalEvents(data, filterText);
+            const filteredCount = (data.match(/BEGIN:VEVENT/g) || []).length;
+            console.log(`  Filtered: ${originalCount} → ${filteredCount} events (containing "${filterText}")`);
         }
         
         fs.writeFileSync(path.join(CALENDARS_DIR, filename), data);
