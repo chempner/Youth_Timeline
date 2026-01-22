@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  blessthun-timeline:
+    image: ghcr.io/YOUR_GITHUB_USERNAME/blessthun-timeline:latest
+    # Or build locally:
+    # build: .
+    container_name: blessthun-timeline
+    ports:
+      - "8080:80"
+    environment:
+      # Admin credentials (CHANGE THESE!)
+      - ADMIN_USER=admin
+      - ADMIN_PASS=your-secure-password
+      # Optional: Pre-configure iCal URLs (can also be set in admin panel)
+      # - BLESSTHUN_ICAL_URL=https://calendar.google.com/calendar/ical/...
+      # - YOUTH_ICAL_URL=https://calendar.google.com/calendar/ical/...
+    volumes:
+      # Persist calendar data and config
+      - ./data:/data
+    restart: unless-stopped

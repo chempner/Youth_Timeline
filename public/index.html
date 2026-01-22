@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Timeline</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --salmon: #FA8072;
+            --salmon-light: #FFF0EE;
+            --salmon-dark: #E05A4C;
+            --mint: #3EB489;
+            --mint-light: #E8F8F2;
+            --mint-dark: #2D9B74;
+            --bg: #FAFBFC;
+            --card-bg: #FFFFFF;
+            --text-primary: #1A1A2E;
+            --text-secondary: #6B7280;
+            --border: #E5E7EB;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            padding: 1.5rem 0;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1.25rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+
+        .legend-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+        }
+
+        .legend-dot.blessthun { background: var(--salmon); }
+        .legend-dot.youth { background: var(--mint); }
+
+        /* Status bar */
+        .status-bar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1.5rem;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: var(--text-secondary);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #D1D5DB;
+        }
+
+        .status-dot.loaded {
+            background: #10B981;
+        }
+
+        .status-dot.error {
+            background: #EF4444;
+        }
+
+        .resync-btn {
+            background: var(--text-primary);
+            color: white;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .resync-btn:hover {
+            background: #374151;
+        }
+
+        .resync-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .resync-btn.syncing {
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .last-sync {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        /* Timeline Styles */
+        .timeline-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .timeline-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem 2.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+        }
+
+        .timeline-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .year-badge {
+            background: linear-gradient(135deg, var(--text-primary), #374151);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .timeline-wrapper {
+            position: relative;
+            padding: 100px 0 100px 0;
+        }
+
+        .timeline-track {
+            position: relative;
+            margin: 0 30px;
+        }
+
+        .timeline-line {
+            height: 4px;
+            background: linear-gradient(90deg, var(--border) 0%, #D1D5DB 50%, var(--border) 100%);
+            border-radius: 2px;
+            position: relative;
+        }
+
+        .timeline-dot-start,
+        .timeline-dot-end {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 10px;
+            height: 10px;
+            background: var(--text-secondary);
+            border-radius: 50%;
+        }
+
+        .timeline-dot-start { left: 0; }
+        .timeline-dot-end { right: 0; }
+
+        .year-label {
+            position: absolute;
+            top: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .year-label-start { left: 0; transform: translateX(-50%); }
+        .year-label-end { right: 0; transform: translateX(50%); }
+
+        .events-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+        }
+
+        .event-marker {
+            position: absolute;
+            bottom: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            pointer-events: auto;
+            cursor: pointer;
+        }
+
+        .event-marker.youth-type {
+            bottom: auto;
+            top: 50%;
+            flex-direction: column-reverse;
+        }
+
+        .event-connector {
+            width: 2px;
+            height: 25px;
+            flex-shrink: 0;
+        }
+
+        .event-marker.blessthun-type .event-connector {
+            background: var(--salmon);
+        }
+
+        .event-marker.youth-type .event-connector {
+            background: var(--mint);
+        }
+
+        .event-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            flex-shrink: 0;
+        }
+
+        .event-dot.blessthun {
+            background: var(--salmon);
+        }
+
+        .event-dot.youth {
+            background: var(--mint);
+        }
+
+        .event-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            max-width: 140px;
+        }
+
+        .event-marker.blessthun-type .event-label {
+            background: var(--salmon-light);
+            border-left: 3px solid var(--salmon);
+        }
+
+        .event-marker.youth-type .event-label {
+            background: var(--mint-light);
+            border-left: 3px solid var(--mint);
+        }
+
+        .event-month {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .event-marker.blessthun-type .event-month {
+            color: var(--salmon-dark);
+        }
+
+        .event-marker.youth-type .event-month {
+            color: var(--mint-dark);
+        }
+
+        .event-name {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 120px;
+            text-align: center;
+        }
+
+        .event-marker:hover {
+            z-index: 100;
+        }
+
+        .event-marker:hover .event-label {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .event-marker:hover .event-name {
+            white-space: normal;
+            overflow: visible;
+            max-width: none;
+        }
+
+        .event-marker.blessthun-type.offset-1 .event-connector { height: 55px; }
+        .event-marker.blessthun-type.offset-2 .event-connector { height: 85px; }
+        .event-marker.youth-type.offset-1 .event-connector { height: 55px; }
+        .event-marker.youth-type.offset-2 .event-connector { height: 85px; }
+
+        .timeline-empty {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, 30px);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        /* Event lists */
+        .lists-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 900px) {
+            .lists-wrapper { grid-template-columns: 1fr; }
+        }
+
+        .list-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .list-card.blessthun {
+            border-top: 4px solid var(--salmon);
+        }
+
+        .list-card.youth {
+            border-top: 4px solid var(--mint);
+        }
+
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .list-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .event-count {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .events-list {
+            max-height: 250px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .events-list-item {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .events-list-item:last-child {
+            border-bottom: none;
+        }
+
+        .events-list-name {
+            font-weight: 500;
+        }
+
+        .events-list-date {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        .events-list-empty {
+            padding: 2rem;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--text-primary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast.success {
+            background: #10B981;
+        }
+
+        .toast.error {
+            background: #EF4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Event Timeline</h1>
+            <p class="subtitle">Two-Year Overview</p>
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-dot blessthun"></div>
+                    <span>BlessThun Events</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot youth"></div>
+                    <span>Youth Revival Events</span>
+                </div>
+            </div>
+            <div class="status-bar">
+                <div class="status-item">
+                    <div class="status-dot" id="blessthun-status"></div>
+                    <span>BlessThun</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-dot" id="youth-status"></div>
+                    <span>Youth Revival</span>
+                </div>
+                <button class="resync-btn" id="resync-btn" onclick="manualResync()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M23 4v6h-6M1 20v-6h6"/>
+                        <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+                    </svg>
+                    Resync
+                </button>
+            </div>
+            <div class="last-sync" id="last-sync"></div>
+        </header>
+
+        <div class="timeline-section">
+            <div class="timeline-card">
+                <div class="timeline-header">
+                    <span class="year-badge" id="year1-badge">2026</span>
+                </div>
+                <div class="timeline-wrapper">
+                    <div class="timeline-track">
+                        <div class="timeline-line">
+                            <div class="timeline-dot-start"></div>
+                            <div class="timeline-dot-end"></div>
+                        </div>
+                        <span class="year-label year-label-start">Jan</span>
+                        <span class="year-label year-label-end">Dec</span>
+                        <div class="events-container" id="timeline1-events"></div>
+                    </div>
+                    <div class="timeline-empty" id="timeline1-empty">No events for this year</div>
+                </div>
+            </div>
+
+            <div class="timeline-card">
+                <div class="timeline-header">
+                    <span class="year-badge" id="year2-badge">2027</span>
+                </div>
+                <div class="timeline-wrapper">
+                    <div class="timeline-track">
+                        <div class="timeline-line">
+                            <div class="timeline-dot-start"></div>
+                            <div class="timeline-dot-end"></div>
+                        </div>
+                        <span class="year-label year-label-start">Jan</span>
+                        <span class="year-label year-label-end">Dec</span>
+                        <div class="events-container" id="timeline2-events"></div>
+                    </div>
+                    <div class="timeline-empty" id="timeline2-empty">No events for this year</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="lists-wrapper">
+            <div class="list-card blessthun">
+                <div class="list-header">
+                    <h3 class="list-title">BlessThun Events</h3>
+                    <span class="event-count" id="blessthun-count">0 events</span>
+                </div>
+                <div class="events-list" id="blessthun-list">
+                    <div class="events-list-empty">Loading...</div>
+                </div>
+            </div>
+
+            <div class="list-card youth">
+                <div class="list-header">
+                    <h3 class="list-title">Youth Revival Events</h3>
+                    <span class="event-count" id="youth-count">0 events</span>
+                </div>
+                <div class="events-list" id="youth-list">
+                    <div class="events-list-empty">Loading...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Configuration
+        const currentYear1 = 2026;
+        const currentYear2 = 2027;
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+        // State
+        let events = {
+            blessthun: [],
+            youth: []
+        };
+
+        // Toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // Parse iCal data
+        function parseIcal(icalData) {
+            const events = [];
+            const lines = icalData.replace(/\r\n /g, '').replace(/\r\n\t/g, '').split(/\r\n|\n|\r/);
+            
+            let currentEvent = null;
+            
+            for (const line of lines) {
+                if (line === 'BEGIN:VEVENT') {
+                    currentEvent = {};
+                } else if (line === 'END:VEVENT' && currentEvent) {
+                    if (currentEvent.date && currentEvent.name) {
+                        events.push({
+                            id: Date.now() + Math.random(),
+                            date: currentEvent.date,
+                            name: currentEvent.name
+                        });
+                    }
+                    currentEvent = null;
+                } else if (currentEvent) {
+                    if (line.startsWith('DTSTART')) {
+                        let dateStr = line.split(':').pop();
+                        dateStr = dateStr.replace(/Z$/, '');
+                        
+                        if (dateStr.length >= 8) {
+                            const year = dateStr.substring(0, 4);
+                            const month = dateStr.substring(4, 6);
+                            const day = dateStr.substring(6, 8);
+                            currentEvent.date = `${year}-${month}-${day}`;
+                        }
+                    } else if (line.startsWith('SUMMARY')) {
+                        currentEvent.name = line.split(':').slice(1).join(':');
+                    }
+                }
+            }
+            
+            return events;
+        }
+
+        // Fetch calendar from server
+        async function fetchCalendar(type) {
+            const statusEl = document.getElementById(`${type}-status`);
+            
+            try {
+                const response = await fetch(`/calendars/${type}.ics?t=${Date.now()}`);
+                
+                if (!response.ok) {
+                    throw new Error('Not found');
+                }
+                
+                const data = await response.text();
+                
+                if (!data.includes('BEGIN:VCALENDAR')) {
+                    throw new Error('Invalid data');
+                }
+                
+                events[type] = parseIcal(data);
+                statusEl.classList.add('loaded');
+                statusEl.classList.remove('error');
+                
+                return true;
+            } catch (err) {
+                console.log(`No ${type} calendar available`);
+                statusEl.classList.add('error');
+                statusEl.classList.remove('loaded');
+                events[type] = [];
+                return false;
+            }
+        }
+
+        // Manual resync
+        async function manualResync() {
+            const btn = document.getElementById('resync-btn');
+            btn.disabled = true;
+            btn.classList.add('syncing');
+            btn.innerHTML = `
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M23 4v6h-6M1 20v-6h6"/>
+                    <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+                </svg>
+                Syncing...
+            `;
+            
+            try {
+                const response = await fetch('/api/resync', { method: 'POST' });
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast('Calendars synced successfully!', 'success');
+                    await loadData();
+                } else {
+                    showToast('Sync failed: ' + result.error, 'error');
+                }
+            } catch (err) {
+                showToast('Sync failed: ' + err.message, 'error');
+            }
+            
+            btn.disabled = false;
+            btn.classList.remove('syncing');
+            btn.innerHTML = `
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M23 4v6h-6M1 20v-6h6"/>
+                    <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+                </svg>
+                Resync
+            `;
+        }
+
+        // Update last sync time
+        async function updateStatus() {
+            try {
+                const response = await fetch('/api/status');
+                const status = await response.json();
+                
+                const lastSyncEl = document.getElementById('last-sync');
+                if (status.lastFetch) {
+                    const date = new Date(status.lastFetch);
+                    lastSyncEl.textContent = `Last sync: ${date.toLocaleString()}`;
+                } else {
+                    lastSyncEl.textContent = 'Never synced';
+                }
+            } catch (err) {
+                console.error('Failed to get status:', err);
+            }
+        }
+
+        // Render events list
+        function renderEventsList(type) {
+            const listEl = document.getElementById(`${type}-list`);
+            const countEl = document.getElementById(`${type}-count`);
+            const typeEvents = events[type].filter(e => e.date);
+            
+            countEl.textContent = `${typeEvents.length} event${typeEvents.length !== 1 ? 's' : ''}`;
+            
+            if (typeEvents.length === 0) {
+                listEl.innerHTML = '<div class="events-list-empty">No events loaded</div>';
+                return;
+            }
+            
+            typeEvents.sort((a, b) => a.date.localeCompare(b.date));
+            
+            listEl.innerHTML = typeEvents.map(event => {
+                const date = new Date(event.date + 'T12:00:00');
+                const formatted = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                return `
+                    <div class="events-list-item">
+                        <span class="events-list-name">${event.name}</span>
+                        <span class="events-list-date">${formatted}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Calculate position on timeline (0-100%)
+        function getPositionForDate(dateStr, year) {
+            const date = new Date(dateStr + 'T12:00:00');
+            if (date.getFullYear() !== year) return null;
+            
+            const startOfYear = new Date(year, 0, 1);
+            const diffTime = date - startOfYear;
+            const dayOfYear = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            
+            const isLeapYear = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+            const totalDays = isLeapYear ? 366 : 365;
+            
+            return (dayOfYear / (totalDays - 1)) * 100;
+        }
+
+        // Render events on timeline
+        function renderTimelineEvents(eventsContainerId, emptyId, year) {
+            const container = document.getElementById(eventsContainerId);
+            const emptyEl = document.getElementById(emptyId);
+            
+            const yearEvents = [];
+            
+            ['blessthun', 'youth'].forEach(type => {
+                events[type].forEach(event => {
+                    if (!event.date) return;
+                    const pos = getPositionForDate(event.date, year);
+                    if (pos !== null) {
+                        const date = new Date(event.date + 'T12:00:00');
+                        yearEvents.push({
+                            ...event,
+                            type,
+                            position: pos,
+                            month: monthNames[date.getMonth()]
+                        });
+                    }
+                });
+            });
+
+            emptyEl.style.display = yearEvents.length === 0 ? 'block' : 'none';
+
+            yearEvents.sort((a, b) => a.position - b.position);
+
+            const blessthunEvents = yearEvents.filter(e => e.type === 'blessthun');
+            const youthEvents = yearEvents.filter(e => e.type === 'youth');
+
+            function assignOffsets(evts) {
+                evts.forEach((event, i) => {
+                    event.offset = 0;
+                    for (let j = 0; j < i; j++) {
+                        if (Math.abs(evts[j].position - event.position) < 12) {
+                            event.offset = Math.min((evts[j].offset || 0) + 1, 2);
+                        }
+                    }
+                });
+            }
+
+            assignOffsets(blessthunEvents);
+            assignOffsets(youthEvents);
+
+            let html = '';
+            yearEvents.forEach(event => {
+                const offsetClass = event.offset > 0 ? ` offset-${event.offset}` : '';
+                const typeClass = `${event.type}-type`;
+                
+                html += `
+                    <div class="event-marker ${typeClass}${offsetClass}" style="left: ${event.position}%;">
+                        <div class="event-label">
+                            <span class="event-month">${event.month}</span>
+                            <span class="event-name">${event.name || 'Untitled'}</span>
+                        </div>
+                        <div class="event-connector"></div>
+                        <div class="event-dot ${event.type}"></div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function renderAllTimelines() {
+            renderTimelineEvents('timeline1-events', 'timeline1-empty', currentYear1);
+            renderTimelineEvents('timeline2-events', 'timeline2-empty', currentYear2);
+        }
+
+        async function loadData() {
+            await Promise.all([
+                fetchCalendar('blessthun'),
+                fetchCalendar('youth')
+            ]);
+            
+            renderEventsList('blessthun');
+            renderEventsList('youth');
+            renderAllTimelines();
+            updateStatus();
+        }
+
+        async function init() {
+            document.getElementById('year1-badge').textContent = currentYear1;
+            document.getElementById('year2-badge').textContent = currentYear2;
+            
+            await loadData();
+        }
+
+        init();
+        
+        // Refresh display every 5 minutes
+        setInterval(loadData, 5 * 60 * 1000);
+    </script>
+</body>
+</html>

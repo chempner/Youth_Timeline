@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Event Timeline</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --salmon: #FA8072;
+            --salmon-light: #FFF0EE;
+            --salmon-dark: #E05A4C;
+            --mint: #3EB489;
+            --mint-light: #E8F8F2;
+            --mint-dark: #2D9B74;
+            --bg: #FAFBFC;
+            --card-bg: #FFFFFF;
+            --text-primary: #1A1A2E;
+            --text-secondary: #6B7280;
+            --border: #E5E7EB;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            padding: 1.5rem 0;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .back-link:hover {
+            color: var(--text-primary);
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .label-hint {
+            font-weight: 400;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-left: 0.5rem;
+        }
+
+        input[type="text"],
+        input[type="url"] {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: border-color 0.2s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--text-primary);
+        }
+
+        input::placeholder {
+            color: #9CA3AF;
+        }
+
+        .input-icon {
+            position: relative;
+        }
+
+        .input-icon input {
+            padding-left: 2.5rem;
+        }
+
+        .input-icon svg {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-left: 0.5rem;
+        }
+
+        .status-badge.connected {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        .status-badge.disconnected {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .status-badge.connected .status-dot {
+            background: #10B981;
+        }
+
+        .status-badge.disconnected .status-dot {
+            background: #EF4444;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--text-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #374151;
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .info-box {
+            background: #F3F4F6;
+            border-radius: 8px;
+            padding: 1rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 1rem;
+        }
+
+        .info-box strong {
+            color: var(--text-primary);
+        }
+
+        .last-fetch {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 1rem;
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--text-primary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast.success {
+            background: #10B981;
+        }
+
+        .toast.error {
+            background: #EF4444;
+        }
+
+        .calendar-section {
+            border-left: 4px solid var(--border);
+            padding-left: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .calendar-section.blessthun {
+            border-color: var(--salmon);
+        }
+
+        .calendar-section.youth {
+            border-color: var(--mint);
+        }
+
+        .calendar-section h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚙️ Admin Settings</h1>
+            <p class="subtitle">Manage calendar connections</p>
+            <a href="/" class="back-link">← Back to Timeline</a>
+        </header>
+
+        <div class="card">
+            <h2 class="card-title">Calendar Feeds</h2>
+            
+            <div class="calendar-section blessthun">
+                <h3>
+                    BlessThun Calendar
+                    <span class="status-badge disconnected" id="blessthun-status">
+                        <span class="status-dot"></span>
+                        Not connected
+                    </span>
+                </h3>
+                <div class="form-group">
+                    <label for="blessthun-url">
+                        iCal URL
+                        <span class="label-hint">(.ics file)</span>
+                    </label>
+                    <input type="url" id="blessthun-url" placeholder="https://calendar.google.com/calendar/ical/...">
+                </div>
+            </div>
+
+            <div class="calendar-section youth">
+                <h3>
+                    Youth Revival Calendar
+                    <span class="status-badge disconnected" id="youth-status">
+                        <span class="status-dot"></span>
+                        Not connected
+                    </span>
+                </h3>
+                <div class="form-group">
+                    <label for="youth-url">
+                        iCal URL
+                        <span class="label-hint">(.ics file)</span>
+                    </label>
+                    <input type="url" id="youth-url" placeholder="https://calendar.google.com/calendar/ical/...">
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-primary" id="save-btn" onclick="saveConfig()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+                        <polyline points="17,21 17,13 7,13 7,21"/>
+                        <polyline points="7,3 7,8 15,8"/>
+                    </svg>
+                    Save & Sync
+                </button>
+                <button class="btn btn-secondary" onclick="loadConfig()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M23 4v6h-6M1 20v-6h6"/>
+                        <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+                    </svg>
+                    Reload
+                </button>
+            </div>
+
+            <div class="last-fetch" id="last-fetch"></div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Help</h2>
+            
+            <div class="info-box">
+                <strong>How to get a Google Calendar iCal link:</strong><br><br>
+                1. Open Google Calendar<br>
+                2. Click the three dots next to your calendar → Settings<br>
+                3. Scroll to "Integrate calendar"<br>
+                4. Copy "Secret address in iCal format"<br><br>
+                <strong>Note:</strong> Calendars are automatically synced every 60 minutes.
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Get stored credentials from session (set by initial auth)
+        let authHeader = 'Basic ' + btoa(prompt('Enter admin credentials (username:password):', 'admin:'));
+
+        // Toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // Update status badges
+        function updateStatusBadge(type, connected) {
+            const badge = document.getElementById(`${type}-status`);
+            if (connected) {
+                badge.className = 'status-badge connected';
+                badge.innerHTML = '<span class="status-dot"></span> Connected';
+            } else {
+                badge.className = 'status-badge disconnected';
+                badge.innerHTML = '<span class="status-dot"></span> Not connected';
+            }
+        }
+
+        // Load current config
+        async function loadConfig() {
+            try {
+                const response = await fetch('/api/admin/config', {
+                    headers: { 'Authorization': authHeader }
+                });
+                
+                if (response.status === 401) {
+                    authHeader = 'Basic ' + btoa(prompt('Invalid credentials. Enter admin credentials (username:password):', 'admin:'));
+                    return loadConfig();
+                }
+                
+                const config = await response.json();
+                
+                document.getElementById('blessthun-url').value = config.blessthunUrl || '';
+                document.getElementById('youth-url').value = config.youthUrl || '';
+                
+                updateStatusBadge('blessthun', !!config.blessthunUrl);
+                updateStatusBadge('youth', !!config.youthUrl);
+                
+                if (config.lastFetch) {
+                    const date = new Date(config.lastFetch);
+                    document.getElementById('last-fetch').textContent = `Last sync: ${date.toLocaleString()}`;
+                }
+                
+            } catch (err) {
+                showToast('Failed to load config: ' + err.message, 'error');
+            }
+        }
+
+        // Save config
+        async function saveConfig() {
+            const btn = document.getElementById('save-btn');
+            btn.disabled = true;
+            btn.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin">
+                    <path d="M23 4v6h-6M1 20v-6h6"/>
+                    <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+                </svg>
+                Saving...
+            `;
+            
+            try {
+                const response = await fetch('/api/admin/config', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': authHeader,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        blessthunUrl: document.getElementById('blessthun-url').value.trim(),
+                        youthUrl: document.getElementById('youth-url').value.trim()
+                    })
+                });
+                
+                if (response.status === 401) {
+                    authHeader = 'Basic ' + btoa(prompt('Invalid credentials. Enter admin credentials (username:password):', 'admin:'));
+                    btn.disabled = false;
+                    btn.innerHTML = `
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+                            <polyline points="17,21 17,13 7,13 7,21"/>
+                            <polyline points="7,3 7,8 15,8"/>
+                        </svg>
+                        Save & Sync
+                    `;
+                    return saveConfig();
+                }
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast('Settings saved and calendars synced!', 'success');
+                    updateStatusBadge('blessthun', result.fetchResults.blessthun);
+                    updateStatusBadge('youth', result.fetchResults.youth);
+                    
+                    if (result.fetchResults.timestamp) {
+                        const date = new Date(result.fetchResults.timestamp);
+                        document.getElementById('last-fetch').textContent = `Last sync: ${date.toLocaleString()}`;
+                    }
+                } else {
+                    showToast('Failed to save: ' + result.error, 'error');
+                }
+            } catch (err) {
+                showToast('Failed to save: ' + err.message, 'error');
+            }
+            
+            btn.disabled = false;
+            btn.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+                    <polyline points="17,21 17,13 7,13 7,21"/>
+                    <polyline points="7,3 7,8 15,8"/>
+                </svg>
+                Save & Sync
+            `;
+        }
+
+        // Initialize
+        loadConfig();
+    </script>
+</body>
+</html>
