@@ -186,7 +186,7 @@
 
         .timeline-wrapper {
             position: relative;
-            padding: 40px 0 40px 0;
+            padding: 80px 0 80px 0;
         }
 
         .timeline-track {
@@ -300,6 +300,120 @@
 
         .event-marker:hover .event-tooltip {
             opacity: 1;
+        }
+
+        /* Manual event with label (above/below line) */
+        .manual-event {
+            position: absolute;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            pointer-events: auto;
+            cursor: pointer;
+            z-index: 15;
+        }
+
+        .manual-event.blessthun-type {
+            bottom: 50%;
+        }
+
+        .manual-event.youth-type {
+            top: 50%;
+            flex-direction: column-reverse;
+        }
+
+        .manual-event .event-connector {
+            width: 2px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .manual-event.blessthun-type .event-connector {
+            background: var(--salmon);
+        }
+
+        .manual-event.youth-type .event-connector {
+            background: var(--mint);
+        }
+
+        .manual-event .event-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 6px 10px;
+            border-radius: 6px;
+            max-width: 120px;
+            transition: all 0.2s ease;
+        }
+
+        .manual-event.blessthun-type .event-label {
+            background: var(--salmon-light);
+            border-left: 3px solid var(--salmon);
+        }
+
+        .manual-event.youth-type .event-label {
+            background: var(--mint-light);
+            border-left: 3px solid var(--mint);
+        }
+
+        .manual-event .event-month {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .manual-event.blessthun-type .event-month {
+            color: var(--salmon-dark);
+        }
+
+        .manual-event.youth-type .event-month {
+            color: var(--mint-dark);
+        }
+
+        .manual-event .event-name {
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            text-align: center;
+            word-wrap: break-word;
+            max-width: 100px;
+        }
+
+        .manual-event:hover {
+            z-index: 100;
+        }
+
+        .manual-event:hover .event-label {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        /* Offset for overlapping manual events */
+        .manual-event.blessthun-type.offset-1 .event-connector { height: 45px; }
+        .manual-event.blessthun-type.offset-2 .event-connector { height: 70px; }
+        .manual-event.youth-type.offset-1 .event-connector { height: 45px; }
+        .manual-event.youth-type.offset-2 .event-connector { height: 70px; }
+
+        /* Multi-day event bar */
+        .multiday-bar {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 8px;
+            border-radius: 4px;
+            z-index: 5;
+        }
+
+        .multiday-bar.blessthun {
+            background: var(--salmon);
+            opacity: 0.6;
+        }
+
+        .multiday-bar.youth {
+            background: var(--mint);
+            opacity: 0.6;
         }
 
         .timeline-empty {
@@ -698,16 +812,26 @@
                 return;
             }
             
-            typeEvents.sort((a, b) => a.date.localeCompare(b.date));
+            typeEvents.sort((a, b) => (a.startDate || a.date).localeCompare(b.startDate || b.date));
             
             listEl.innerHTML = typeEvents.map(event => {
-                const date = new Date(event.date + 'T12:00:00');
-                const formatted = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                const startDateStr = event.startDate || event.date;
+                const endDateStr = event.endDate || startDateStr;
+                const startDate = new Date(startDateStr + 'T12:00:00');
+                const startFormatted = startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                
+                let dateDisplay = startFormatted;
+                if (endDateStr !== startDateStr) {
+                    const endDate = new Date(endDateStr + 'T12:00:00');
+                    const endFormatted = endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    dateDisplay = `${startFormatted} - ${endFormatted}`;
+                }
+                
                 const manualBadge = event.manual ? '<span class="manual-badge">Manual</span>' : '';
                 return `
                     <div class="events-list-item">
                         <span class="events-list-name">${event.name} ${manualBadge}</span>
-                        <span class="events-list-date">${formatted}</span>
+                        <span class="events-list-date">${dateDisplay}</span>
                     </div>
                 `;
             }).join('');
@@ -733,15 +857,19 @@
             const container = document.getElementById(eventsContainerId);
             const emptyEl = document.getElementById(emptyId);
             
-            const yearEvents = [];
+            const icalEvents = [];
+            const manualEventsForYear = [];
             
+            // Collect iCal events (dots only) - filtered by MIN_YEAR
             ['blessthun', 'youth'].forEach(type => {
-                getAllEvents(type).forEach(event => {
+                (events[type] || []).forEach(event => {
                     if (!event.date) return;
+                    const eventYear = parseInt(event.date.substring(0, 4));
+                    if (eventYear < MIN_YEAR) return;
                     const pos = getPositionForDate(event.date, year);
                     if (pos !== null) {
                         const date = new Date(event.date + 'T12:00:00');
-                        yearEvents.push({
+                        icalEvents.push({
                             ...event,
                             type,
                             position: pos,
@@ -751,14 +879,104 @@
                     }
                 });
             });
+            
+            // Collect manual events (labels + multi-day bars) - filtered by MIN_YEAR
+            ['blessthun', 'youth'].forEach(type => {
+                (manualEvents[type] || []).forEach(event => {
+                    const startDateStr = event.startDate || event.date;
+                    const endDateStr = event.endDate || startDateStr;
+                    if (!startDateStr) return;
+                    
+                    const startYear = parseInt(startDateStr.substring(0, 4));
+                    if (startYear < MIN_YEAR) return;
+                    
+                    const startPos = getPositionForDate(startDateStr, year);
+                    const endPos = getPositionForDate(endDateStr, year);
+                    
+                    // Check if event overlaps with this year
+                    if (startPos !== null || endPos !== null) {
+                        const startDate = new Date(startDateStr + 'T12:00:00');
+                        const endDate = new Date(endDateStr + 'T12:00:00');
+                        
+                        // Clamp positions to year boundaries
+                        const clampedStartPos = startPos !== null ? startPos : 0;
+                        const clampedEndPos = endPos !== null ? endPos : 100;
+                        
+                        // Format date display
+                        let dateDisplay = monthNames[startDate.getMonth()].substring(0, 3) + ' ' + startDate.getDate();
+                        if (startDateStr !== endDateStr) {
+                            dateDisplay += ' - ' + monthNames[endDate.getMonth()].substring(0, 3) + ' ' + endDate.getDate();
+                        }
+                        
+                        manualEventsForYear.push({
+                            ...event,
+                            type,
+                            startPosition: clampedStartPos,
+                            endPosition: clampedEndPos,
+                            isMultiDay: startDateStr !== endDateStr,
+                            dateDisplay
+                        });
+                    }
+                });
+            });
 
-            emptyEl.style.display = yearEvents.length === 0 ? 'block' : 'none';
+            const hasEvents = icalEvents.length > 0 || manualEventsForYear.length > 0;
+            emptyEl.style.display = hasEvents ? 'none' : 'block';
+
+            // Assign offsets to manual events to avoid overlap
+            const blessthunManual = manualEventsForYear.filter(e => e.type === 'blessthun');
+            const youthManual = manualEventsForYear.filter(e => e.type === 'youth');
+
+            function assignOffsets(evts) {
+                evts.sort((a, b) => a.startPosition - b.startPosition);
+                evts.forEach((event, i) => {
+                    event.offset = 0;
+                    for (let j = 0; j < i; j++) {
+                        const overlap = Math.abs(evts[j].startPosition - event.startPosition) < 10 ||
+                                       (event.isMultiDay && evts[j].endPosition > event.startPosition - 5);
+                        if (overlap) {
+                            event.offset = Math.min((evts[j].offset || 0) + 1, 2);
+                        }
+                    }
+                });
+            }
+
+            assignOffsets(blessthunManual);
+            assignOffsets(youthManual);
 
             let html = '';
-            yearEvents.forEach(event => {
+            
+            // Render multi-day bars first (behind everything)
+            manualEventsForYear.filter(e => e.isMultiDay).forEach(event => {
+                const width = event.endPosition - event.startPosition;
+                html += `
+                    <div class="multiday-bar ${event.type}" style="left: ${event.startPosition}%; width: ${width}%;"></div>
+                `;
+            });
+            
+            // Render iCal events as dots
+            icalEvents.forEach(event => {
                 html += `
                     <div class="event-marker" style="left: ${event.position}%;">
                         <div class="event-tooltip">${event.month} ${event.day}: ${event.name || 'Event'}</div>
+                        <div class="event-dot ${event.type}"></div>
+                    </div>
+                `;
+            });
+            
+            // Render manual events with labels
+            manualEventsForYear.forEach(event => {
+                const offsetClass = event.offset > 0 ? ` offset-${event.offset}` : '';
+                const typeClass = `${event.type}-type`;
+                const position = event.isMultiDay ? (event.startPosition + event.endPosition) / 2 : event.startPosition;
+                
+                html += `
+                    <div class="manual-event ${typeClass}${offsetClass}" style="left: ${position}%;">
+                        <div class="event-label">
+                            <span class="event-month">${event.dateDisplay}</span>
+                            <span class="event-name">${event.name || 'Event'}</span>
+                        </div>
+                        <div class="event-connector"></div>
                         <div class="event-dot ${event.type}"></div>
                     </div>
                 `;
@@ -788,12 +1006,21 @@
         function getAllEvents(type) {
             const icalEvents = events[type] || [];
             const manual = manualEvents[type] || [];
-            const combined = [...icalEvents, ...manual];
+            
+            // Normalize iCal events to have startDate
+            const normalizedIcal = icalEvents.map(e => ({
+                ...e,
+                startDate: e.date,
+                endDate: e.date
+            }));
+            
+            const combined = [...normalizedIcal, ...manual];
             
             // Filter to only show events from MIN_YEAR onwards
             return combined.filter(e => {
-                if (!e.date) return false;
-                const year = parseInt(e.date.substring(0, 4));
+                const dateStr = e.startDate || e.date;
+                if (!dateStr) return false;
+                const year = parseInt(dateStr.substring(0, 4));
                 return year >= MIN_YEAR;
             });
         }

@@ -493,8 +493,12 @@
                         <option value="blessthun">BlessThun</option>
                         <option value="youth">Youth Revival</option>
                     </select>
-                    <input type="date" id="manual-date" class="form-input">
                     <input type="text" id="manual-name" class="form-input" placeholder="Event name">
+                </div>
+                <div class="form-row" style="margin-top: 0.5rem;">
+                    <input type="date" id="manual-start-date" class="form-input" title="Start date">
+                    <span style="align-self: center; color: var(--text-secondary);">to</span>
+                    <input type="date" id="manual-end-date" class="form-input" title="End date (optional)">
                     <button class="btn btn-primary" onclick="addManualEvent()">Add</button>
                 </div>
             </div>
@@ -660,16 +664,24 @@
                     return;
                 }
                 
-                events.sort((a, b) => a.date.localeCompare(b.date));
+                events.sort((a, b) => (a.startDate || a.date).localeCompare(b.startDate || b.date));
                 
                 listEl.innerHTML = events.map(event => {
-                    const date = new Date(event.date + 'T12:00:00');
-                    const formatted = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    const startDate = new Date((event.startDate || event.date) + 'T12:00:00');
+                    const endDate = event.endDate ? new Date(event.endDate + 'T12:00:00') : null;
+                    const startFormatted = startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    
+                    let dateStr = startFormatted;
+                    if (endDate && event.endDate !== event.startDate && event.endDate !== event.date) {
+                        const endFormatted = endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                        dateStr = `${startFormatted} - ${endFormatted}`;
+                    }
+                    
                     return `
                         <div class="manual-event-item">
                             <div class="manual-event-info">
                                 <span class="manual-event-name">${event.name}</span>
-                                <span class="manual-event-date">${formatted}</span>
+                                <span class="manual-event-date">${dateStr}</span>
                             </div>
                             <button class="delete-btn" onclick="deleteManualEvent('${type}', ${event.id})">×</button>
                         </div>
@@ -680,11 +692,12 @@
 
         async function addManualEvent() {
             const type = document.getElementById('manual-type').value;
-            const date = document.getElementById('manual-date').value;
+            const startDate = document.getElementById('manual-start-date').value;
+            const endDate = document.getElementById('manual-end-date').value;
             const name = document.getElementById('manual-name').value.trim();
             
-            if (!date || !name) {
-                showToast('Please enter date and name', 'error');
+            if (!startDate || !name) {
+                showToast('Please enter start date and name', 'error');
                 return;
             }
             
@@ -695,7 +708,7 @@
                         'Authorization': authHeader,
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ type, date, name })
+                    body: JSON.stringify({ type, startDate, endDate: endDate || startDate, name })
                 });
                 
                 if (response.status === 401) {
@@ -707,7 +720,8 @@
                 
                 if (result.success) {
                     showToast('Event added!', 'success');
-                    document.getElementById('manual-date').value = '';
+                    document.getElementById('manual-start-date').value = '';
+                    document.getElementById('manual-end-date').value = '';
                     document.getElementById('manual-name').value = '';
                     loadManualEvents();
                 } else {

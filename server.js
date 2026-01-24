@@ -261,10 +261,10 @@ app.get('/api/manual-events', (req, res) => {
 
 // Add manual event (admin only)
 app.post('/api/manual-events', adminAuth, (req, res) => {
-    const { type, date, name } = req.body;
+    const { type, startDate, endDate, name } = req.body;
     
-    if (!type || !date || !name) {
-        return res.status(400).json({ error: 'Missing type, date, or name' });
+    if (!type || !startDate || !name) {
+        return res.status(400).json({ error: 'Missing type, startDate, or name' });
     }
     
     if (type !== 'blessthun' && type !== 'youth') {
@@ -273,7 +273,8 @@ app.post('/api/manual-events', adminAuth, (req, res) => {
     
     const event = {
         id: Date.now(),
-        date: date.trim(),
+        startDate: startDate.trim(),
+        endDate: endDate ? endDate.trim() : startDate.trim(),
         name: name.trim(),
         manual: true
     };
