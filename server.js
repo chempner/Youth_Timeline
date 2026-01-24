@@ -10,6 +10,7 @@ const PORT = process.env.PORT || 80;
 const DATA_DIR = process.env.DATA_DIR || '/data';
 const CONFIG_FILE = path.join(DATA_DIR, 'config.json');
 const CALENDARS_DIR = path.join(DATA_DIR, 'calendars');
+const MANUAL_EVENTS_FILE = path.join(DATA_DIR, 'manual-events.json');
 
 // Admin credentials from environment
 const ADMIN_USER = process.env.ADMIN_USER || 'admin';
@@ -39,7 +40,24 @@ function saveConfig(config) {
     fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2));
 }
 
+// Load or create manual events
+function loadManualEvents() {
+    try {
+        if (fs.existsSync(MANUAL_EVENTS_FILE)) {
+            return JSON.parse(fs.readFileSync(MANUAL_EVENTS_FILE, 'utf8'));
+        }
+    } catch (e) {
+        console.error('Error loading manual events:', e);
+    }
+    return { blessthun: [], youth: [] };
+}
+
+function saveManualEvents(events) {
+    fs.writeFileSync(MANUAL_EVENTS_FILE, JSON.stringify(events, null, 2));
+}
+
 let config = loadConfig();
+let manualEvents = loadManualEvents();
 
 // Basic auth middleware for admin routes
 function adminAuth(req, res, next) {
@@ -234,6 +252,57 @@ app.post('/api/admin/config', adminAuth, async (req, res) => {
 // Admin page
 app.get('/admin', adminAuth, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+// Get manual events (public)
+app.get('/api/manual-events', (req, res) => {
+    res.json(manualEvents);
+});
+
+// Add manual event (admin only)
+app.post('/api/manual-events', adminAuth, (req, res) => {
+    const { type, date, name } = req.body;
+    
+    if (!type || !date || !name) {
+        return res.status(400).json({ error: 'Missing type, date, or name' });
+    }
+    
+    if (type !== 'blessthun' && type !== 'youth') {
+        return res.status(400).json({ error: 'Type must be "blessthun" or "youth"' });
+    }
+    
+    const event = {
+        id: Date.now(),
+        date: date.trim(),
+        name: name.trim(),
+        manual: true
+    };
+    
+    manualEvents[type].push(event);
+    saveManualEvents(manualEvents);
+    
+    res.json({ success: true, event });
+});
+
+// Delete manual event (admin only)
+app.delete('/api/manual-events/:type/:id', adminAuth, (req, res) => {
+    const { type, id } = req.params;
+    
+    if (type !== 'blessthun' && type !== 'youth') {
+        return res.status(400).json({ error: 'Invalid type' });
+    }
+    
+    const eventId = parseInt(id);
+    const index = manualEvents[type].findIndex(e => e.id === eventId);
+    
+    if (index === -1) {
+        return res.status(404).json({ error: 'Event not found' });
+    }
+    
+    manualEvents[type].splice(index, 1);
+    saveManualEvents(manualEvents);
+    
+    res.json({ success: true });
 });
 
 // Start server

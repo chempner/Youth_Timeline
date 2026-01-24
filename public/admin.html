@@ -239,6 +239,112 @@
             color: var(--text-primary);
         }
 
+        .info-text {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .manual-event-form {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .form-select {
+            padding: 0.6rem 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            background: white;
+        }
+
+        .form-input {
+            padding: 0.6rem 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--text-primary);
+        }
+
+        .manual-events-section {
+            margin-top: 1.5rem;
+        }
+
+        .manual-events-section h4 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .manual-events-list {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .manual-event-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.6rem 0.8rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.85rem;
+        }
+
+        .manual-event-item:last-child {
+            border-bottom: none;
+        }
+
+        .manual-event-info {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .manual-event-name {
+            font-weight: 500;
+        }
+
+        .manual-event-date {
+            color: var(--text-secondary);
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .delete-btn:hover {
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+
+        .empty-list {
+            padding: 1rem;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
         .last-fetch {
             font-size: 0.85rem;
             color: var(--text-secondary);
@@ -376,6 +482,33 @@
                 <strong>Note:</strong> Calendars are automatically synced every 60 minutes.
             </div>
         </div>
+
+        <div class="card">
+            <h2 class="card-title">Manual Events</h2>
+            <p class="info-text">Add fixed events that won't be synced from Elvanto</p>
+            
+            <div class="manual-event-form">
+                <div class="form-row">
+                    <select id="manual-type" class="form-select">
+                        <option value="blessthun">BlessThun</option>
+                        <option value="youth">Youth Revival</option>
+                    </select>
+                    <input type="date" id="manual-date" class="form-input">
+                    <input type="text" id="manual-name" class="form-input" placeholder="Event name">
+                    <button class="btn btn-primary" onclick="addManualEvent()">Add</button>
+                </div>
+            </div>
+
+            <div class="manual-events-section">
+                <h4>BlessThun Events</h4>
+                <div class="manual-events-list" id="manual-blessthun-list"></div>
+            </div>
+
+            <div class="manual-events-section">
+                <h4>Youth Revival Events</h4>
+                <div class="manual-events-list" id="manual-youth-list"></div>
+            </div>
+        </div>
     </div>
 
     <div class="toast" id="toast"></div>
@@ -502,8 +635,121 @@
             `;
         }
 
+        // Manual Events
+        let manualEvents = { blessthun: [], youth: [] };
+
+        async function loadManualEvents() {
+            try {
+                const response = await fetch('/api/manual-events');
+                if (response.ok) {
+                    manualEvents = await response.json();
+                    renderManualEvents();
+                }
+            } catch (err) {
+                console.error('Failed to load manual events:', err);
+            }
+        }
+
+        function renderManualEvents() {
+            ['blessthun', 'youth'].forEach(type => {
+                const listEl = document.getElementById(`manual-${type}-list`);
+                const events = manualEvents[type] || [];
+                
+                if (events.length === 0) {
+                    listEl.innerHTML = '<div class="empty-list">No manual events</div>';
+                    return;
+                }
+                
+                events.sort((a, b) => a.date.localeCompare(b.date));
+                
+                listEl.innerHTML = events.map(event => {
+                    const date = new Date(event.date + 'T12:00:00');
+                    const formatted = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    return `
+                        <div class="manual-event-item">
+                            <div class="manual-event-info">
+                                <span class="manual-event-name">${event.name}</span>
+                                <span class="manual-event-date">${formatted}</span>
+                            </div>
+                            <button class="delete-btn" onclick="deleteManualEvent('${type}', ${event.id})">×</button>
+                        </div>
+                    `;
+                }).join('');
+            });
+        }
+
+        async function addManualEvent() {
+            const type = document.getElementById('manual-type').value;
+            const date = document.getElementById('manual-date').value;
+            const name = document.getElementById('manual-name').value.trim();
+            
+            if (!date || !name) {
+                showToast('Please enter date and name', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/manual-events', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': authHeader,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ type, date, name })
+                });
+                
+                if (response.status === 401) {
+                    showToast('Authentication required', 'error');
+                    return;
+                }
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast('Event added!', 'success');
+                    document.getElementById('manual-date').value = '';
+                    document.getElementById('manual-name').value = '';
+                    loadManualEvents();
+                } else {
+                    showToast('Failed: ' + result.error, 'error');
+                }
+            } catch (err) {
+                showToast('Failed: ' + err.message, 'error');
+            }
+        }
+
+        async function deleteManualEvent(type, id) {
+            if (!confirm('Delete this event?')) return;
+            
+            try {
+                const response = await fetch(`/api/manual-events/${type}/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': authHeader
+                    }
+                });
+                
+                if (response.status === 401) {
+                    showToast('Authentication required', 'error');
+                    return;
+                }
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast('Event deleted', 'success');
+                    loadManualEvents();
+                } else {
+                    showToast('Failed: ' + result.error, 'error');
+                }
+            } catch (err) {
+                showToast('Failed: ' + err.message, 'error');
+            }
+        }
+
         // Initialize
         loadConfig();
+        loadManualEvents();
     </script>
 </body>
 </html>

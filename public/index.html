@@ -392,6 +392,18 @@
             color: var(--text-secondary);
         }
 
+        .manual-badge {
+            display: inline-block;
+            background: var(--border);
+            color: var(--text-secondary);
+            font-size: 0.65rem;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            margin-left: 0.3rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
         /* Toast notification */
         .toast {
             position: fixed;
@@ -525,10 +537,16 @@
         // Configuration
         const currentYear1 = 2026;
         const currentYear2 = 2027;
+        const MIN_YEAR = 2026; // Only show events from this year onwards
         const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
         // State
         let events = {
+            blessthun: [],
+            youth: []
+        };
+        
+        let manualEvents = {
             blessthun: [],
             youth: []
         };
@@ -671,7 +689,7 @@
         function renderEventsList(type) {
             const listEl = document.getElementById(`${type}-list`);
             const countEl = document.getElementById(`${type}-count`);
-            const typeEvents = events[type].filter(e => e.date);
+            const typeEvents = getAllEvents(type);
             
             countEl.textContent = `${typeEvents.length} event${typeEvents.length !== 1 ? 's' : ''}`;
             
@@ -685,9 +703,10 @@
             listEl.innerHTML = typeEvents.map(event => {
                 const date = new Date(event.date + 'T12:00:00');
                 const formatted = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                const manualBadge = event.manual ? '<span class="manual-badge">Manual</span>' : '';
                 return `
                     <div class="events-list-item">
-                        <span class="events-list-name">${event.name}</span>
+                        <span class="events-list-name">${event.name} ${manualBadge}</span>
                         <span class="events-list-date">${formatted}</span>
                     </div>
                 `;
@@ -717,7 +736,7 @@
             const yearEvents = [];
             
             ['blessthun', 'youth'].forEach(type => {
-                events[type].forEach(event => {
+                getAllEvents(type).forEach(event => {
                     if (!event.date) return;
                     const pos = getPositionForDate(event.date, year);
                     if (pos !== null) {
@@ -753,10 +772,37 @@
             renderTimelineEvents('timeline2-events', 'timeline2-empty', currentYear2);
         }
 
+        // Fetch manual events
+        async function fetchManualEvents() {
+            try {
+                const response = await fetch('/api/manual-events');
+                if (response.ok) {
+                    manualEvents = await response.json();
+                }
+            } catch (err) {
+                console.error('Failed to fetch manual events:', err);
+            }
+        }
+
+        // Get all events (iCal + manual) filtered by year
+        function getAllEvents(type) {
+            const icalEvents = events[type] || [];
+            const manual = manualEvents[type] || [];
+            const combined = [...icalEvents, ...manual];
+            
+            // Filter to only show events from MIN_YEAR onwards
+            return combined.filter(e => {
+                if (!e.date) return false;
+                const year = parseInt(e.date.substring(0, 4));
+                return year >= MIN_YEAR;
+            });
+        }
+
         async function loadData() {
             await Promise.all([
                 fetchCalendar('blessthun'),
-                fetchCalendar('youth')
+                fetchCalendar('youth'),
+                fetchManualEvents()
             ]);
             
             renderEventsList('blessthun');
