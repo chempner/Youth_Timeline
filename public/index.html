@@ -186,7 +186,7 @@
 
         .timeline-wrapper {
             position: relative;
-            padding: 100px 0 100px 0;
+            padding: 40px 0 40px 0;
         }
 
         .timeline-track {
@@ -239,33 +239,15 @@
 
         .event-marker {
             position: absolute;
-            bottom: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            top: 50%;
+            transform: translate(-50%, -50%);
             pointer-events: auto;
             cursor: pointer;
+            z-index: 10;
         }
 
-        .event-marker.youth-type {
-            bottom: auto;
-            top: 50%;
-            flex-direction: column-reverse;
-        }
-
-        .event-connector {
-            width: 2px;
-            height: 25px;
-            flex-shrink: 0;
-        }
-
-        .event-marker.blessthun-type .event-connector {
-            background: var(--salmon);
-        }
-
-        .event-marker.youth-type .event-connector {
-            background: var(--mint);
+        .event-marker:hover {
+            z-index: 100;
         }
 
         .event-dot {
@@ -274,7 +256,11 @@
             border-radius: 50%;
             border: 3px solid white;
             box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-            flex-shrink: 0;
+            transition: transform 0.2s ease;
+        }
+
+        .event-marker:hover .event-dot {
+            transform: scale(1.3);
         }
 
         .event-dot.blessthun {
@@ -285,77 +271,42 @@
             background: var(--mint);
         }
 
-        .event-label {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 6px 12px;
+        .event-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text-primary);
+            color: white;
+            padding: 0.5rem 0.75rem;
             border-radius: 6px;
-            transition: all 0.2s ease;
-            max-width: 140px;
-        }
-
-        .event-marker.blessthun-type .event-label {
-            background: var(--salmon-light);
-            border-left: 3px solid var(--salmon);
-        }
-
-        .event-marker.youth-type .event-label {
-            background: var(--mint-light);
-            border-left: 3px solid var(--mint);
-        }
-
-        .event-month {
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .event-marker.blessthun-type .event-month {
-            color: var(--salmon-dark);
-        }
-
-        .event-marker.youth-type .event-month {
-            color: var(--mint-dark);
-        }
-
-        .event-name {
             font-size: 0.75rem;
-            font-weight: 500;
-            color: var(--text-primary);
             white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 120px;
-            text-align: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            margin-bottom: 8px;
         }
 
-        .event-marker:hover {
-            z-index: 100;
+        .event-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: var(--text-primary);
         }
 
-        .event-marker:hover .event-label {
-            transform: scale(1.05);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        .event-marker:hover .event-tooltip {
+            opacity: 1;
         }
-
-        .event-marker:hover .event-name {
-            white-space: normal;
-            overflow: visible;
-            max-width: none;
-        }
-
-        .event-marker.blessthun-type.offset-1 .event-connector { height: 55px; }
-        .event-marker.blessthun-type.offset-2 .event-connector { height: 85px; }
-        .event-marker.youth-type.offset-1 .event-connector { height: 55px; }
-        .event-marker.youth-type.offset-2 .event-connector { height: 85px; }
 
         .timeline-empty {
             position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, 30px);
+            transform: translate(-50%, -50%);
             color: var(--text-secondary);
             font-size: 0.9rem;
             white-space: nowrap;
@@ -775,7 +726,8 @@
                             ...event,
                             type,
                             position: pos,
-                            month: monthNames[date.getMonth()]
+                            month: monthNames[date.getMonth()],
+                            day: date.getDate()
                         });
                     }
                 });
@@ -783,37 +735,11 @@
 
             emptyEl.style.display = yearEvents.length === 0 ? 'block' : 'none';
 
-            yearEvents.sort((a, b) => a.position - b.position);
-
-            const blessthunEvents = yearEvents.filter(e => e.type === 'blessthun');
-            const youthEvents = yearEvents.filter(e => e.type === 'youth');
-
-            function assignOffsets(evts) {
-                evts.forEach((event, i) => {
-                    event.offset = 0;
-                    for (let j = 0; j < i; j++) {
-                        if (Math.abs(evts[j].position - event.position) < 12) {
-                            event.offset = Math.min((evts[j].offset || 0) + 1, 2);
-                        }
-                    }
-                });
-            }
-
-            assignOffsets(blessthunEvents);
-            assignOffsets(youthEvents);
-
             let html = '';
             yearEvents.forEach(event => {
-                const offsetClass = event.offset > 0 ? ` offset-${event.offset}` : '';
-                const typeClass = `${event.type}-type`;
-                
                 html += `
-                    <div class="event-marker ${typeClass}${offsetClass}" style="left: ${event.position}%;">
-                        <div class="event-label">
-                            <span class="event-month">${event.month}</span>
-                            <span class="event-name">${event.name || 'Untitled'}</span>
-                        </div>
-                        <div class="event-connector"></div>
+                    <div class="event-marker" style="left: ${event.position}%;">
+                        <div class="event-tooltip">${event.month} ${event.day}: ${event.name || 'Event'}</div>
                         <div class="event-dot ${event.type}"></div>
                     </div>
                 `;
