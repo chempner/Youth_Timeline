@@ -86,6 +86,23 @@ const EVENT_FILTERS = {
     'youth.ics': 'Youth Revival'
 };
 
+// Clean event name based on type
+function cleanEventName(name, filterText) {
+    if (!name) return name;
+    
+    // For BlessThun, just keep "BlessThun"
+    if (filterText === 'BlessThun') {
+        return 'BlessThun';
+    }
+    
+    // For Youth Revival, just keep "Youth Revival"
+    if (filterText === 'Youth Revival') {
+        return 'Youth Revival';
+    }
+    
+    return name;
+}
+
 // Filter iCal data to only include matching events
 function filterIcalEvents(icalData, filterText) {
     if (!filterText) return icalData;
@@ -95,16 +112,24 @@ function filterIcalEvents(icalData, filterText) {
     let inEvent = false;
     let currentEventLines = [];
     let currentEventSummary = '';
+    let summaryLineIndex = -1;
     
-    for (const line of lines) {
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        
         if (line === 'BEGIN:VEVENT') {
             inEvent = true;
             currentEventLines = [line];
             currentEventSummary = '';
+            summaryLineIndex = -1;
         } else if (line === 'END:VEVENT') {
             currentEventLines.push(line);
             // Check if this event matches the filter
             if (currentEventSummary.includes(filterText)) {
+                // Clean the summary line
+                if (summaryLineIndex >= 0) {
+                    currentEventLines[summaryLineIndex] = 'SUMMARY:' + cleanEventName(currentEventSummary, filterText);
+                }
                 outputLines.push(...currentEventLines);
             }
             inEvent = false;
@@ -113,6 +138,7 @@ function filterIcalEvents(icalData, filterText) {
             currentEventLines.push(line);
             if (line.startsWith('SUMMARY')) {
                 currentEventSummary = line.split(':').slice(1).join(':');
+                summaryLineIndex = currentEventLines.length - 1;
             }
         } else {
             outputLines.push(line);
