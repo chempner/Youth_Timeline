@@ -239,11 +239,22 @@
 
         .event-marker {
             position: absolute;
-            top: 50%;
-            transform: translate(-50%, -50%);
+            transform: translateX(-50%);
             pointer-events: auto;
             cursor: pointer;
             z-index: 10;
+        }
+
+        .event-marker.blessthun {
+            top: 50%;
+            transform: translate(-50%, -100%);
+            margin-top: -4px;
+        }
+
+        .event-marker.youth {
+            top: 50%;
+            transform: translate(-50%, 0%);
+            margin-top: 4px;
         }
 
         .event-marker:hover {
@@ -273,7 +284,6 @@
 
         .event-tooltip {
             position: absolute;
-            bottom: 100%;
             left: 50%;
             transform: translateX(-50%);
             background: var(--text-primary);
@@ -285,10 +295,14 @@
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.2s ease;
+        }
+
+        .event-marker.blessthun .event-tooltip {
+            bottom: 100%;
             margin-bottom: 8px;
         }
 
-        .event-tooltip::after {
+        .event-marker.blessthun .event-tooltip::after {
             content: '';
             position: absolute;
             top: 100%;
@@ -296,6 +310,21 @@
             transform: translateX(-50%);
             border: 5px solid transparent;
             border-top-color: var(--text-primary);
+        }
+
+        .event-marker.youth .event-tooltip {
+            top: 100%;
+            margin-top: 8px;
+        }
+
+        .event-marker.youth .event-tooltip::after {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-bottom-color: var(--text-primary);
         }
 
         .event-marker:hover .event-tooltip {
@@ -399,21 +428,23 @@
         /* Multi-day event bar */
         .multiday-bar {
             position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            height: 8px;
-            border-radius: 4px;
+            height: 6px;
+            border-radius: 3px;
             z-index: 5;
         }
 
         .multiday-bar.blessthun {
             background: var(--salmon);
-            opacity: 0.6;
+            opacity: 0.5;
+            top: 50%;
+            transform: translateY(-10px);
         }
 
         .multiday-bar.youth {
             background: var(--mint);
-            opacity: 0.6;
+            opacity: 0.5;
+            top: 50%;
+            transform: translateY(4px);
         }
 
         .timeline-empty {
@@ -957,7 +988,7 @@
             // Render iCal events as dots
             icalEvents.forEach(event => {
                 html += `
-                    <div class="event-marker" style="left: ${event.position}%;">
+                    <div class="event-marker ${event.type}" style="left: ${event.position}%;">
                         <div class="event-tooltip">${event.month} ${event.day}: ${event.name || 'Event'}</div>
                         <div class="event-dot ${event.type}"></div>
                     </div>
