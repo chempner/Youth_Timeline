@@ -107,7 +107,10 @@ function cleanEventName(name, filterText) {
 function filterIcalEvents(icalData, filterText) {
     if (!filterText) return icalData;
     
-    const lines = icalData.split(/\r\n|\n|\r/);
+    // First, unfold lines (iCal wraps long lines with leading space/tab)
+    const unfoldedData = icalData.replace(/\r\n[ \t]/g, '').replace(/\n[ \t]/g, '');
+    
+    const lines = unfoldedData.split(/\r\n|\n|\r/);
     const outputLines = [];
     let inEvent = false;
     let currentEventLines = [];
@@ -136,8 +139,8 @@ function filterIcalEvents(icalData, filterText) {
             currentEventLines = [];
         } else if (inEvent) {
             currentEventLines.push(line);
-            if (line.startsWith('SUMMARY')) {
-                currentEventSummary = line.split(':').slice(1).join(':');
+            if (line.startsWith('SUMMARY:')) {
+                currentEventSummary = line.substring(8);
                 summaryLineIndex = currentEventLines.length - 1;
             }
         } else {
