@@ -80,33 +80,34 @@ function adminAuth(req, res, next) {
     }
 }
 
-// Event name filters
-const EVENT_FILTERS = {
+// Event name filters - these get special treatment (dots)
+const PRIMARY_FILTERS = {
     'blessthun.ics': 'BlessThun',
     'youth.ics': 'Youth Revival'
 };
+
+// Events to completely exclude
+const EXCLUDE_FILTERS = ['Revival Championsleague'];
 
 // Clean event name based on type
 function cleanEventName(name, filterText) {
     if (!name) return name;
     
     // For BlessThun, just keep "BlessThun"
-    if (filterText === 'BlessThun') {
+    if (filterText === 'BlessThun' && name.includes('BlessThun')) {
         return 'BlessThun';
     }
     
     // For Youth Revival, just keep "Youth Revival"
-    if (filterText === 'Youth Revival') {
+    if (filterText === 'Youth Revival' && name.includes('Youth Revival')) {
         return 'Youth Revival';
     }
     
     return name;
 }
 
-// Filter iCal data to only include matching events
+// Filter iCal data - keep all events but clean primary ones, exclude blacklisted
 function filterIcalEvents(icalData, filterText) {
-    if (!filterText) return icalData;
-    
     // First, unfold lines (iCal wraps long lines with leading space/tab)
     const unfoldedData = icalData.replace(/\r\n[ \t]/g, '').replace(/\n[ \t]/g, '');
     
@@ -127,14 +128,18 @@ function filterIcalEvents(icalData, filterText) {
             summaryLineIndex = -1;
         } else if (line === 'END:VEVENT') {
             currentEventLines.push(line);
-            // Check if this event matches the filter
-            if (currentEventSummary.includes(filterText)) {
-                // Clean the summary line
-                if (summaryLineIndex >= 0) {
+            
+            // Check if this event should be excluded
+            const shouldExclude = EXCLUDE_FILTERS.some(ex => currentEventSummary.includes(ex));
+            
+            if (!shouldExclude) {
+                // Clean the summary line if it matches primary filter
+                if (summaryLineIndex >= 0 && filterText && currentEventSummary.includes(filterText)) {
                     currentEventLines[summaryLineIndex] = 'SUMMARY:' + cleanEventName(currentEventSummary, filterText);
                 }
                 outputLines.push(...currentEventLines);
             }
+            
             inEvent = false;
             currentEventLines = [];
         } else if (inEvent) {
@@ -177,14 +182,12 @@ async function fetchCalendar(url, filename) {
             throw new Error('Invalid iCal data');
         }
         
-        // Filter events by name
-        const filterText = EVENT_FILTERS[filename];
-        if (filterText) {
-            const originalCount = (data.match(/BEGIN:VEVENT/g) || []).length;
-            data = filterIcalEvents(data, filterText);
-            const filteredCount = (data.match(/BEGIN:VEVENT/g) || []).length;
-            console.log(`  Filtered: ${originalCount} → ${filteredCount} events (containing "${filterText}")`);
-        }
+        // Filter events
+        const filterText = PRIMARY_FILTERS[filename];
+        const originalCount = (data.match(/BEGIN:VEVENT/g) || []).length;
+        data = filterIcalEvents(data, filterText);
+        const filteredCount = (data.match(/BEGIN:VEVENT/g) || []).length;
+        console.log(`  Processed: ${originalCount} → ${filteredCount} events (excluded: Revival Championsleague)`);
         
         fs.writeFileSync(path.join(CALENDARS_DIR, filename), data);
         console.log(`✓ Saved ${filename}`);

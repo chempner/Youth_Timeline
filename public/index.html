@@ -215,6 +215,42 @@
         .timeline-dot-start { left: 0; }
         .timeline-dot-end { right: 0; }
 
+        /* Month markers */
+        .month-markers {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+        }
+
+        .month-marker {
+            position: absolute;
+            top: 50%;
+            transform: translateX(-50%);
+        }
+
+        .month-marker-line {
+            width: 1px;
+            height: 12px;
+            background: var(--border);
+            margin-top: -6px;
+        }
+
+        .month-marker-label {
+            position: absolute;
+            top: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            white-space: nowrap;
+        }
+
         .year-label {
             position: absolute;
             top: 20px;
@@ -223,6 +259,7 @@
             color: var(--text-secondary);
             text-transform: uppercase;
             letter-spacing: 0.05em;
+            display: none;
         }
 
         .year-label-start { left: 0; transform: translateX(-50%); }
@@ -237,6 +274,7 @@
             pointer-events: none;
         }
 
+        /* Primary events (BlessThun/Youth Revival) - dots */
         .event-marker {
             position: absolute;
             transform: translateX(-50%);
@@ -425,26 +463,151 @@
         .manual-event.youth-type.offset-1 .event-connector { height: 45px; }
         .manual-event.youth-type.offset-2 .event-connector { height: 70px; }
 
-        /* Multi-day event bar */
-        .multiday-bar {
+        /* Multi-day event pill */
+        .multiday-pill {
             position: absolute;
-            height: 6px;
-            border-radius: 3px;
-            z-index: 5;
+            height: 20px;
+            border-radius: 10px;
+            z-index: 12;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 8px;
+            cursor: pointer;
+            pointer-events: auto;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
         }
 
-        .multiday-bar.blessthun {
+        .multiday-pill.blessthun {
             background: var(--salmon);
-            opacity: 0.5;
             top: 50%;
-            transform: translateY(-10px);
+            transform: translateY(-18px);
         }
 
-        .multiday-bar.youth {
+        .multiday-pill.youth {
             background: var(--mint);
-            opacity: 0.5;
             top: 50%;
-            transform: translateY(4px);
+            transform: translateY(-2px);
+        }
+
+        .multiday-pill .pill-label {
+            font-size: 0.6rem;
+            font-weight: 600;
+            color: white;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+
+        .multiday-pill:hover {
+            z-index: 100;
+        }
+
+        .multiday-pill .event-tooltip {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text-primary);
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .multiday-pill.blessthun .event-tooltip {
+            bottom: 100%;
+            margin-bottom: 8px;
+        }
+
+        .multiday-pill.youth .event-tooltip {
+            top: 100%;
+            margin-top: 8px;
+        }
+
+        .multiday-pill:hover .event-tooltip {
+            opacity: 1;
+        }
+
+        /* Secondary events (other calendar events) - small squares */
+        .secondary-event {
+            position: absolute;
+            transform: translateX(-50%);
+            pointer-events: auto;
+            cursor: pointer;
+            z-index: 8;
+        }
+
+        .secondary-event.blessthun {
+            top: 50%;
+            transform: translate(-50%, -100%);
+            margin-top: -2px;
+        }
+
+        .secondary-event.youth {
+            top: 50%;
+            transform: translate(-50%, 0%);
+            margin-top: 2px;
+        }
+
+        .secondary-event:hover {
+            z-index: 100;
+        }
+
+        .event-square {
+            width: 8px;
+            height: 8px;
+            border-radius: 2px;
+            border: 2px solid white;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+            transition: transform 0.2s ease;
+        }
+
+        .secondary-event:hover .event-square {
+            transform: scale(1.4);
+        }
+
+        .event-square.blessthun {
+            background: var(--salmon);
+            opacity: 0.7;
+        }
+
+        .event-square.youth {
+            background: var(--mint);
+            opacity: 0.7;
+        }
+
+        .secondary-event .event-tooltip {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text-primary);
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .secondary-event.blessthun .event-tooltip {
+            bottom: 100%;
+            margin-bottom: 8px;
+        }
+
+        .secondary-event.youth .event-tooltip {
+            top: 100%;
+            margin-top: 8px;
+        }
+
+        .secondary-event:hover .event-tooltip {
+            opacity: 1;
         }
 
         .timeline-empty {
@@ -626,8 +789,7 @@
                             <div class="timeline-dot-start"></div>
                             <div class="timeline-dot-end"></div>
                         </div>
-                        <span class="year-label year-label-start">Jan</span>
-                        <span class="year-label year-label-end">Dec</span>
+                        <div class="month-markers" id="timeline1-months"></div>
                         <div class="events-container" id="timeline1-events"></div>
                     </div>
                     <div class="timeline-empty" id="timeline1-empty">No events for this year</div>
@@ -644,8 +806,7 @@
                             <div class="timeline-dot-start"></div>
                             <div class="timeline-dot-end"></div>
                         </div>
-                        <span class="year-label year-label-start">Jan</span>
-                        <span class="year-label year-label-end">Dec</span>
+                        <div class="month-markers" id="timeline2-months"></div>
                         <div class="events-container" id="timeline2-events"></div>
                     </div>
                     <div class="timeline-empty" id="timeline2-empty">No events for this year</div>
@@ -684,6 +845,13 @@
         const currentYear2 = 2027;
         const MIN_YEAR = 2026; // Only show events from this year onwards
         const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        const monthShort = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        
+        // Primary events get dots, others get squares
+        const PRIMARY_EVENTS = {
+            blessthun: 'BlessThun',
+            youth: 'Youth Revival'
+        };
 
         // State
         let events = {
@@ -883,15 +1051,40 @@
             return (dayOfYear / (totalDays - 1)) * 100;
         }
 
+        // Render month markers
+        function renderMonthMarkers(containerId, year) {
+            const container = document.getElementById(containerId);
+            let html = '';
+            
+            for (let month = 0; month < 12; month++) {
+                const date = new Date(year, month, 1);
+                const pos = getPositionForDate(`${year}-${String(month + 1).padStart(2, '0')}-01`, year);
+                if (pos !== null) {
+                    html += `
+                        <div class="month-marker" style="left: ${pos}%;">
+                            <div class="month-marker-line"></div>
+                            <span class="month-marker-label">${monthShort[month]}</span>
+                        </div>
+                    `;
+                }
+            }
+            
+            container.innerHTML = html;
+        }
+
         // Render events on timeline
-        function renderTimelineEvents(eventsContainerId, emptyId, year) {
+        function renderTimelineEvents(eventsContainerId, monthsContainerId, emptyId, year) {
             const container = document.getElementById(eventsContainerId);
             const emptyEl = document.getElementById(emptyId);
             
-            const icalEvents = [];
+            // Render month markers
+            renderMonthMarkers(monthsContainerId, year);
+            
+            const primaryEvents = [];
+            const secondaryEvents = [];
             const manualEventsForYear = [];
             
-            // Collect iCal events (dots only) - filtered by MIN_YEAR
+            // Collect iCal events - separate primary (dots) and secondary (squares)
             ['blessthun', 'youth'].forEach(type => {
                 (events[type] || []).forEach(event => {
                     if (!event.date) return;
@@ -900,18 +1093,25 @@
                     const pos = getPositionForDate(event.date, year);
                     if (pos !== null) {
                         const date = new Date(event.date + 'T12:00:00');
-                        icalEvents.push({
+                        const eventData = {
                             ...event,
                             type,
                             position: pos,
                             month: monthNames[date.getMonth()],
                             day: date.getDate()
-                        });
+                        };
+                        
+                        // Check if primary event
+                        if (event.name === PRIMARY_EVENTS[type]) {
+                            primaryEvents.push(eventData);
+                        } else {
+                            secondaryEvents.push(eventData);
+                        }
                     }
                 });
             });
             
-            // Collect manual events (labels + multi-day bars) - filtered by MIN_YEAR
+            // Collect manual events (labels + multi-day pills) - filtered by MIN_YEAR
             ['blessthun', 'youth'].forEach(type => {
                 (manualEvents[type] || []).forEach(event => {
                     const startDateStr = event.startDate || event.date;
@@ -934,9 +1134,9 @@
                         const clampedEndPos = endPos !== null ? endPos : 100;
                         
                         // Format date display
-                        let dateDisplay = monthNames[startDate.getMonth()].substring(0, 3) + ' ' + startDate.getDate();
+                        let dateDisplay = monthShort[startDate.getMonth()] + ' ' + startDate.getDate();
                         if (startDateStr !== endDateStr) {
-                            dateDisplay += ' - ' + monthNames[endDate.getMonth()].substring(0, 3) + ' ' + endDate.getDate();
+                            dateDisplay += ' - ' + monthShort[endDate.getMonth()] + ' ' + endDate.getDate();
                         }
                         
                         manualEventsForYear.push({
@@ -951,7 +1151,7 @@
                 });
             });
 
-            const hasEvents = icalEvents.length > 0 || manualEventsForYear.length > 0;
+            const hasEvents = primaryEvents.length > 0 || secondaryEvents.length > 0 || manualEventsForYear.length > 0;
             emptyEl.style.display = hasEvents ? 'none' : 'block';
 
             // Assign offsets to manual events to avoid overlap
@@ -977,16 +1177,30 @@
 
             let html = '';
             
-            // Render multi-day bars first (behind everything)
+            // Render multi-day pills
             manualEventsForYear.filter(e => e.isMultiDay).forEach(event => {
-                const width = event.endPosition - event.startPosition;
+                const width = Math.max(event.endPosition - event.startPosition, 3);
+                const tooltipText = `${event.dateDisplay}: ${event.name || 'Event'}`;
                 html += `
-                    <div class="multiday-bar ${event.type}" style="left: ${event.startPosition}%; width: ${width}%;"></div>
+                    <div class="multiday-pill ${event.type}" style="left: ${event.startPosition}%; width: ${width}%;">
+                        <div class="event-tooltip">${tooltipText}</div>
+                        <span class="pill-label">${event.name || 'Event'}</span>
+                    </div>
                 `;
             });
             
-            // Render iCal events as dots
-            icalEvents.forEach(event => {
+            // Render secondary events as small squares
+            secondaryEvents.forEach(event => {
+                html += `
+                    <div class="secondary-event ${event.type}" style="left: ${event.position}%;">
+                        <div class="event-tooltip">${event.month} ${event.day}: ${event.name || 'Event'}</div>
+                        <div class="event-square ${event.type}"></div>
+                    </div>
+                `;
+            });
+            
+            // Render primary iCal events as dots
+            primaryEvents.forEach(event => {
                 html += `
                     <div class="event-marker ${event.type}" style="left: ${event.position}%;">
                         <div class="event-tooltip">${event.month} ${event.day}: ${event.name || 'Event'}</div>
@@ -995,14 +1209,13 @@
                 `;
             });
             
-            // Render manual events with labels
-            manualEventsForYear.forEach(event => {
+            // Render single-day manual events with labels
+            manualEventsForYear.filter(e => !e.isMultiDay).forEach(event => {
                 const offsetClass = event.offset > 0 ? ` offset-${event.offset}` : '';
                 const typeClass = `${event.type}-type`;
-                const position = event.isMultiDay ? (event.startPosition + event.endPosition) / 2 : event.startPosition;
                 
                 html += `
-                    <div class="manual-event ${typeClass}${offsetClass}" style="left: ${position}%;">
+                    <div class="manual-event ${typeClass}${offsetClass}" style="left: ${event.startPosition}%;">
                         <div class="event-label">
                             <span class="event-month">${event.dateDisplay}</span>
                             <span class="event-name">${event.name || 'Event'}</span>
@@ -1017,8 +1230,8 @@
         }
 
         function renderAllTimelines() {
-            renderTimelineEvents('timeline1-events', 'timeline1-empty', currentYear1);
-            renderTimelineEvents('timeline2-events', 'timeline2-empty', currentYear2);
+            renderTimelineEvents('timeline1-events', 'timeline1-months', 'timeline1-empty', currentYear1);
+            renderTimelineEvents('timeline2-events', 'timeline2-months', 'timeline2-empty', currentYear2);
         }
 
         // Fetch manual events
