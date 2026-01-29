@@ -234,7 +234,7 @@
 
         .timeline-wrapper {
             position: relative;
-            padding: 80px 0 80px 0;
+            padding: 100px 0 100px 0;
         }
 
         .timeline-track {
@@ -423,8 +423,7 @@
             height: 8px;
             border-radius: 4px;
             z-index: 11;
-            pointer-events: auto;
-            cursor: pointer;
+            pointer-events: none;
             box-shadow: 0 1px 3px rgba(0,0,0,0.15);
         }
 
@@ -440,40 +439,99 @@
             transform: translateY(7px);
         }
 
-        .multiday-pill:hover {
-            z-index: 100;
-            height: 10px;
-            border-radius: 5px;
-        }
-
-        .multiday-pill .event-tooltip {
+        /* Multi-day event label (above/below pill) */
+        .multiday-label {
             position: absolute;
-            left: 50%;
             transform: translateX(-50%);
-            background: var(--text-primary);
-            color: white;
-            padding: 0.5rem 0.75rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            pointer-events: auto;
+            cursor: pointer;
+            z-index: 15;
+        }
+
+        .multiday-label.blessthun-type {
+            bottom: 50%;
+        }
+
+        .multiday-label.youth-type {
+            top: 50%;
+            flex-direction: column-reverse;
+        }
+
+        .multiday-label .event-connector {
+            width: 2px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .multiday-label.blessthun-type .event-connector {
+            background: var(--salmon);
+        }
+
+        .multiday-label.youth-type .event-connector {
+            background: var(--mint);
+        }
+
+        .multiday-label .event-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 6px 10px;
             border-radius: 6px;
-            font-size: 0.75rem;
-            white-space: nowrap;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s ease;
+            max-width: 120px;
+            transition: all 0.2s ease;
         }
 
-        .multiday-pill.blessthun .event-tooltip {
-            bottom: 100%;
-            margin-bottom: 8px;
+        .multiday-label.blessthun-type .event-label {
+            background: var(--salmon-light);
+            border-left: 3px solid var(--salmon);
         }
 
-        .multiday-pill.youth .event-tooltip {
-            top: 100%;
-            margin-top: 8px;
+        .multiday-label.youth-type .event-label {
+            background: var(--mint-light);
+            border-left: 3px solid var(--mint);
         }
 
-        .multiday-pill:hover .event-tooltip {
-            opacity: 1;
+        .multiday-label .event-month {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
         }
+
+        .multiday-label.blessthun-type .event-month {
+            color: var(--salmon-dark);
+        }
+
+        .multiday-label.youth-type .event-month {
+            color: var(--mint-dark);
+        }
+
+        .multiday-label .event-name {
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            text-align: center;
+            word-wrap: break-word;
+            max-width: 100px;
+        }
+
+        .multiday-label:hover {
+            z-index: 100;
+        }
+
+        .multiday-label:hover .event-label {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        /* Offset for overlapping multi-day labels */
+        .multiday-label.blessthun-type.offset-1 .event-connector { height: 45px; }
+        .multiday-label.blessthun-type.offset-2 .event-connector { height: 70px; }
+        .multiday-label.youth-type.offset-1 .event-connector { height: 45px; }
+        .multiday-label.youth-type.offset-2 .event-connector { height: 70px; }
 
         /* Secondary events (other calendar events) - small squares */
         .secondary-event {
@@ -812,6 +870,34 @@
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
+        // Convert UTC date to CET (UTC+1 with DST)
+        function utcToCET(dateStr, timeStr) {
+            // Parse as UTC
+            const year = parseInt(dateStr.substring(0, 4));
+            const month = parseInt(dateStr.substring(4, 6)) - 1;
+            const day = parseInt(dateStr.substring(6, 8));
+            
+            let hours = 0, minutes = 0, seconds = 0;
+            if (timeStr && timeStr.length >= 6) {
+                hours = parseInt(timeStr.substring(0, 2));
+                minutes = parseInt(timeStr.substring(2, 4));
+                seconds = parseInt(timeStr.substring(4, 6));
+            }
+            
+            // Create UTC date
+            const utcDate = new Date(Date.UTC(year, month, day, hours, minutes, seconds));
+            
+            // Convert to CET/CEST using Intl
+            const cetString = utcDate.toLocaleString('en-CA', { 
+                timeZone: 'Europe/Zurich',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            });
+            
+            return cetString; // Returns YYYY-MM-DD format
+        }
+
         // Parse iCal data
         function parseIcal(icalData) {
             const events = [];
@@ -821,7 +907,7 @@
             
             for (const line of lines) {
                 if (line === 'BEGIN:VEVENT') {
-                    currentEvent = {};
+                    currentEvent = { isUTC: false };
                 } else if (line === 'END:VEVENT' && currentEvent) {
                     if (currentEvent.startDate && currentEvent.name) {
                         // Determine if multi-day
@@ -840,24 +926,44 @@
                     currentEvent = null;
                 } else if (currentEvent) {
                     if (line.startsWith('DTSTART')) {
-                        let dateStr = line.split(':').pop();
-                        dateStr = dateStr.replace(/Z$/, '');
+                        let value = line.split(':').pop();
+                        const isUTC = value.endsWith('Z');
+                        value = value.replace(/Z$/, '');
                         
-                        if (dateStr.length >= 8) {
-                            const year = dateStr.substring(0, 4);
-                            const month = dateStr.substring(4, 6);
-                            const day = dateStr.substring(6, 8);
-                            currentEvent.startDate = `${year}-${month}-${day}`;
+                        if (value.length >= 8) {
+                            const dateStr = value.substring(0, 8);
+                            const timeStr = value.length > 8 ? value.substring(9) : null;
+                            
+                            if (isUTC && timeStr) {
+                                // Convert UTC to CET
+                                currentEvent.startDate = utcToCET(dateStr, timeStr);
+                            } else {
+                                // Already local time or date-only
+                                const year = dateStr.substring(0, 4);
+                                const month = dateStr.substring(4, 6);
+                                const day = dateStr.substring(6, 8);
+                                currentEvent.startDate = `${year}-${month}-${day}`;
+                            }
                         }
                     } else if (line.startsWith('DTEND')) {
-                        let dateStr = line.split(':').pop();
-                        dateStr = dateStr.replace(/Z$/, '');
+                        let value = line.split(':').pop();
+                        const isUTC = value.endsWith('Z');
+                        value = value.replace(/Z$/, '');
                         
-                        if (dateStr.length >= 8) {
-                            const year = dateStr.substring(0, 4);
-                            const month = dateStr.substring(4, 6);
-                            const day = dateStr.substring(6, 8);
-                            currentEvent.endDate = `${year}-${month}-${day}`;
+                        if (value.length >= 8) {
+                            const dateStr = value.substring(0, 8);
+                            const timeStr = value.length > 8 ? value.substring(9) : null;
+                            
+                            if (isUTC && timeStr) {
+                                // Convert UTC to CET
+                                currentEvent.endDate = utcToCET(dateStr, timeStr);
+                            } else {
+                                // Already local time or date-only
+                                const year = dateStr.substring(0, 4);
+                                const month = dateStr.substring(4, 6);
+                                const day = dateStr.substring(6, 8);
+                                currentEvent.endDate = `${year}-${month}-${day}`;
+                            }
                         }
                     } else if (line.startsWith('SUMMARY')) {
                         currentEvent.name = line.split(':').slice(1).join(':');
@@ -1174,15 +1280,51 @@
             const hasEvents = primaryEvents.length > 0 || secondaryEvents.length > 0 || multiDayEvents.length > 0;
             emptyEl.style.display = hasEvents ? 'none' : 'block';
 
+            // Assign offsets to multi-day events to avoid overlap
+            const blessthunMulti = multiDayEvents.filter(e => e.type === 'blessthun');
+            const youthMulti = multiDayEvents.filter(e => e.type === 'youth');
+
+            function assignOffsets(evts) {
+                evts.sort((a, b) => a.startPosition - b.startPosition);
+                evts.forEach((event, i) => {
+                    event.offset = 0;
+                    const eventCenter = (event.startPosition + event.endPosition) / 2;
+                    for (let j = 0; j < i; j++) {
+                        const otherCenter = (evts[j].startPosition + evts[j].endPosition) / 2;
+                        const overlap = Math.abs(otherCenter - eventCenter) < 12;
+                        if (overlap) {
+                            event.offset = Math.min((evts[j].offset || 0) + 1, 2);
+                        }
+                    }
+                });
+            }
+
+            assignOffsets(blessthunMulti);
+            assignOffsets(youthMulti);
+
             let html = '';
             
-            // Render multi-day pills with tooltip
+            // Render multi-day pills
             multiDayEvents.forEach(event => {
                 const width = Math.max(event.endPosition - event.startPosition, 3);
-                const tooltipText = `${event.dateDisplay}: ${event.name || 'Event'}`;
                 html += `
-                    <div class="multiday-pill ${event.type}" style="left: ${event.startPosition}%; width: ${width}%;">
-                        <div class="event-tooltip">${tooltipText}</div>
+                    <div class="multiday-pill ${event.type}" style="left: ${event.startPosition}%; width: ${width}%;"></div>
+                `;
+            });
+
+            // Render multi-day labels
+            multiDayEvents.forEach(event => {
+                const offsetClass = event.offset > 0 ? ` offset-${event.offset}` : '';
+                const typeClass = `${event.type}-type`;
+                const centerPosition = (event.startPosition + event.endPosition) / 2;
+                
+                html += `
+                    <div class="multiday-label ${typeClass}${offsetClass}" style="left: ${centerPosition}%;">
+                        <div class="event-label">
+                            <span class="event-month">${event.dateDisplay}</span>
+                            <span class="event-name">${event.name || 'Event'}</span>
+                        </div>
+                        <div class="event-connector"></div>
                     </div>
                 `;
             });
