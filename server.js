@@ -10,11 +10,6 @@ const PORT = process.env.PORT || 80;
 const DATA_DIR = process.env.DATA_DIR || '/data';
 const CONFIG_FILE = path.join(DATA_DIR, 'config.json');
 const CALENDARS_DIR = path.join(DATA_DIR, 'calendars');
-const MANUAL_EVENTS_FILE = path.join(DATA_DIR, 'manual-events.json');
-
-// Admin credentials from environment
-const ADMIN_USER = process.env.ADMIN_USER || 'admin';
-const ADMIN_PASS = process.env.ADMIN_PASS || 'changeme';
 
 // Ensure directories exist
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -40,45 +35,7 @@ function saveConfig(config) {
     fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2));
 }
 
-// Load or create manual events
-function loadManualEvents() {
-    try {
-        if (fs.existsSync(MANUAL_EVENTS_FILE)) {
-            return JSON.parse(fs.readFileSync(MANUAL_EVENTS_FILE, 'utf8'));
-        }
-    } catch (e) {
-        console.error('Error loading manual events:', e);
-    }
-    return { blessthun: [], youth: [] };
-}
-
-function saveManualEvents(events) {
-    fs.writeFileSync(MANUAL_EVENTS_FILE, JSON.stringify(events, null, 2));
-}
-
 let config = loadConfig();
-let manualEvents = loadManualEvents();
-
-// Basic auth middleware for admin routes
-function adminAuth(req, res, next) {
-    const authHeader = req.headers.authorization;
-    
-    if (!authHeader || !authHeader.startsWith('Basic ')) {
-        res.setHeader('WWW-Authenticate', 'Basic realm="Admin"');
-        return res.status(401).json({ error: 'Authentication required' });
-    }
-    
-    const base64Credentials = authHeader.split(' ')[1];
-    const credentials = Buffer.from(base64Credentials, 'base64').toString('utf8');
-    const [username, password] = credentials.split(':');
-    
-    if (username === ADMIN_USER && password === ADMIN_PASS) {
-        next();
-    } else {
-        res.setHeader('WWW-Authenticate', 'Basic realm="Admin"');
-        return res.status(401).json({ error: 'Invalid credentials' });
-    }
-}
 
 // Event name filters - these get special treatment (dots)
 const PRIMARY_FILTERS = {
@@ -87,18 +44,16 @@ const PRIMARY_FILTERS = {
 };
 
 // Events to completely exclude
-const EXCLUDE_FILTERS = ['Revival Championsleague'];
+const EXCLUDE_FILTERS = ['Revival Champions League Night'];
 
 // Clean event name based on type
 function cleanEventName(name, filterText) {
     if (!name) return name;
     
-    // For BlessThun, just keep "BlessThun"
     if (filterText === 'BlessThun' && name.includes('BlessThun')) {
         return 'BlessThun';
     }
     
-    // For Youth Revival, just keep "Youth Revival"
     if (filterText === 'Youth Revival' && name.includes('Youth Revival')) {
         return 'Youth Revival';
     }
@@ -156,38 +111,23 @@ function filterIcalEvents(icalData, filterText) {
     return outputLines.join('\r\n');
 }
 
-// Fetch a single calendar
+// Fetch calendar
 async function fetchCalendar(url, filename) {
-    if (!url) {
-        console.log(`No URL configured for ${filename}`);
-        return false;
-    }
+    if (!url) return false;
     
     try {
         console.log(`Fetching ${filename} from ${url}`);
-        const response = await fetch(url, {
-            headers: {
-                'User-Agent': 'BlessThun-Timeline/1.0'
-            },
-            timeout: 30000
-        });
-        
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         
         let data = await response.text();
-        
-        if (!data.includes('BEGIN:VCALENDAR')) {
-            throw new Error('Invalid iCal data');
-        }
         
         // Filter events
         const filterText = PRIMARY_FILTERS[filename];
         const originalCount = (data.match(/BEGIN:VEVENT/g) || []).length;
         data = filterIcalEvents(data, filterText);
         const filteredCount = (data.match(/BEGIN:VEVENT/g) || []).length;
-        console.log(`  Processed: ${originalCount} → ${filteredCount} events (excluded: Revival Championsleague)`);
+        console.log(`  Processed: ${originalCount} → ${filteredCount} events (excluded: Revival Champions League Night)`);
         
         fs.writeFileSync(path.join(CALENDARS_DIR, filename), data);
         console.log(`✓ Saved ${filename}`);
@@ -220,128 +160,28 @@ app.use(express.json());
 app.use(express.static('public'));
 
 // Serve calendar files
-app.get('/calendars/:file', (req, res) => {
-    const filePath = path.join(CALENDARS_DIR, req.params.file);
-    if (fs.existsSync(filePath)) {
-        res.setHeader('Content-Type', 'text/calendar');
-        res.setHeader('Cache-Control', 'no-cache');
-        res.sendFile(filePath);
-    } else {
-        res.status(404).send('Calendar not found');
-    }
-});
+app.use('/calendars', express.static(CALENDARS_DIR));
 
-// Get sync status (public)
+// API: Get status
 app.get('/api/status', (req, res) => {
-    const blessthunExists = fs.existsSync(path.join(CALENDARS_DIR, 'blessthun.ics'));
-    const youthExists = fs.existsSync(path.join(CALENDARS_DIR, 'youth.ics'));
-    
     res.json({
         lastFetch: config.lastFetch,
-        blessthun: blessthunExists,
-        youth: youthExists
+        hasUrls: {
+            blessthun: !!config.blessthunUrl,
+            youth: !!config.youthUrl
+        }
     });
 });
 
-// Manual resync (public - just triggers fetch)
+// API: Trigger resync
 app.post('/api/resync', async (req, res) => {
-    try {
-        const results = await fetchAllCalendars();
-        res.json({ success: true, ...results });
-    } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
-    }
-});
-
-// Admin: Get current config
-app.get('/api/admin/config', adminAuth, (req, res) => {
-    res.json({
-        blessthunUrl: config.blessthunUrl,
-        youthUrl: config.youthUrl,
-        lastFetch: config.lastFetch
-    });
-});
-
-// Admin: Update config
-app.post('/api/admin/config', adminAuth, async (req, res) => {
-    const { blessthunUrl, youthUrl } = req.body;
-    
-    if (typeof blessthunUrl === 'string') {
-        config.blessthunUrl = blessthunUrl.trim();
-    }
-    if (typeof youthUrl === 'string') {
-        config.youthUrl = youthUrl.trim();
-    }
-    
-    saveConfig(config);
-    
-    // Fetch calendars with new URLs
     const results = await fetchAllCalendars();
-    
-    res.json({ success: true, config, fetchResults: results });
-});
-
-// Admin page
-app.get('/admin', adminAuth, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
-});
-
-// Get manual events (public)
-app.get('/api/manual-events', (req, res) => {
-    res.json(manualEvents);
-});
-
-// Add manual event (admin only)
-app.post('/api/manual-events', adminAuth, (req, res) => {
-    const { type, startDate, endDate, name } = req.body;
-    
-    if (!type || !startDate || !name) {
-        return res.status(400).json({ error: 'Missing type, startDate, or name' });
-    }
-    
-    if (type !== 'blessthun' && type !== 'youth') {
-        return res.status(400).json({ error: 'Type must be "blessthun" or "youth"' });
-    }
-    
-    const event = {
-        id: Date.now(),
-        startDate: startDate.trim(),
-        endDate: endDate ? endDate.trim() : startDate.trim(),
-        name: name.trim(),
-        manual: true
-    };
-    
-    manualEvents[type].push(event);
-    saveManualEvents(manualEvents);
-    
-    res.json({ success: true, event });
-});
-
-// Delete manual event (admin only)
-app.delete('/api/manual-events/:type/:id', adminAuth, (req, res) => {
-    const { type, id } = req.params;
-    
-    if (type !== 'blessthun' && type !== 'youth') {
-        return res.status(400).json({ error: 'Invalid type' });
-    }
-    
-    const eventId = parseInt(id);
-    const index = manualEvents[type].findIndex(e => e.id === eventId);
-    
-    if (index === -1) {
-        return res.status(404).json({ error: 'Event not found' });
-    }
-    
-    manualEvents[type].splice(index, 1);
-    saveManualEvents(manualEvents);
-    
-    res.json({ success: true });
+    res.json({ success: true, results });
 });
 
 // Start server
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
-    console.log(`Admin credentials: ${ADMIN_USER} / ${'*'.repeat(ADMIN_PASS.length)}`);
     
     // Initial fetch
     fetchAllCalendars();

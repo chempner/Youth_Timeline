@@ -369,100 +369,6 @@
             opacity: 1;
         }
 
-        /* Manual event with label (above/below line) */
-        .manual-event {
-            position: absolute;
-            transform: translateX(-50%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            pointer-events: auto;
-            cursor: pointer;
-            z-index: 15;
-        }
-
-        .manual-event.blessthun-type {
-            bottom: 50%;
-        }
-
-        .manual-event.youth-type {
-            top: 50%;
-            flex-direction: column-reverse;
-        }
-
-        .manual-event .event-connector {
-            width: 2px;
-            height: 20px;
-            flex-shrink: 0;
-        }
-
-        .manual-event.blessthun-type .event-connector {
-            background: var(--salmon);
-        }
-
-        .manual-event.youth-type .event-connector {
-            background: var(--mint);
-        }
-
-        .manual-event .event-label {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 6px 10px;
-            border-radius: 6px;
-            max-width: 120px;
-            transition: all 0.2s ease;
-        }
-
-        .manual-event.blessthun-type .event-label {
-            background: var(--salmon-light);
-            border-left: 3px solid var(--salmon);
-        }
-
-        .manual-event.youth-type .event-label {
-            background: var(--mint-light);
-            border-left: 3px solid var(--mint);
-        }
-
-        .manual-event .event-month {
-            font-size: 0.65rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
-        }
-
-        .manual-event.blessthun-type .event-month {
-            color: var(--salmon-dark);
-        }
-
-        .manual-event.youth-type .event-month {
-            color: var(--mint-dark);
-        }
-
-        .manual-event .event-name {
-            font-size: 0.7rem;
-            font-weight: 500;
-            color: var(--text-primary);
-            text-align: center;
-            word-wrap: break-word;
-            max-width: 100px;
-        }
-
-        .manual-event:hover {
-            z-index: 100;
-        }
-
-        .manual-event:hover .event-label {
-            transform: scale(1.05);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        /* Offset for overlapping manual events */
-        .manual-event.blessthun-type.offset-1 .event-connector { height: 45px; }
-        .manual-event.blessthun-type.offset-2 .event-connector { height: 70px; }
-        .manual-event.youth-type.offset-1 .event-connector { height: 45px; }
-        .manual-event.youth-type.offset-2 .event-connector { height: 70px; }
-
         /* Multi-day event pill */
         .multiday-pill {
             position: absolute;
@@ -688,18 +594,6 @@
             color: var(--text-secondary);
         }
 
-        .manual-badge {
-            display: inline-block;
-            background: var(--border);
-            color: var(--text-secondary);
-            font-size: 0.65rem;
-            padding: 0.15rem 0.4rem;
-            border-radius: 4px;
-            margin-left: 0.3rem;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
         /* Toast notification */
         .toast {
             position: fixed;
@@ -846,11 +740,6 @@
             blessthun: [],
             youth: []
         };
-        
-        let manualEvents = {
-            blessthun: [],
-            youth: []
-        };
 
         // Toast notification
         function showToast(message, type = 'success') {
@@ -871,11 +760,18 @@
                 if (line === 'BEGIN:VEVENT') {
                     currentEvent = {};
                 } else if (line === 'END:VEVENT' && currentEvent) {
-                    if (currentEvent.date && currentEvent.name) {
+                    if (currentEvent.startDate && currentEvent.name) {
+                        // Determine if multi-day
+                        const endDate = currentEvent.endDate || currentEvent.startDate;
+                        const isMultiDay = endDate !== currentEvent.startDate;
+                        
                         events.push({
                             id: Date.now() + Math.random(),
-                            date: currentEvent.date,
-                            name: currentEvent.name
+                            date: currentEvent.startDate,
+                            startDate: currentEvent.startDate,
+                            endDate: endDate,
+                            name: currentEvent.name,
+                            isMultiDay: isMultiDay
                         });
                     }
                     currentEvent = null;
@@ -888,7 +784,17 @@
                             const year = dateStr.substring(0, 4);
                             const month = dateStr.substring(4, 6);
                             const day = dateStr.substring(6, 8);
-                            currentEvent.date = `${year}-${month}-${day}`;
+                            currentEvent.startDate = `${year}-${month}-${day}`;
+                        }
+                    } else if (line.startsWith('DTEND')) {
+                        let dateStr = line.split(':').pop();
+                        dateStr = dateStr.replace(/Z$/, '');
+                        
+                        if (dateStr.length >= 8) {
+                            const year = dateStr.substring(0, 4);
+                            const month = dateStr.substring(4, 6);
+                            const day = dateStr.substring(6, 8);
+                            currentEvent.endDate = `${year}-${month}-${day}`;
                         }
                     } else if (line.startsWith('SUMMARY')) {
                         currentEvent.name = line.split(':').slice(1).join(':');
@@ -1014,10 +920,9 @@
                     dateDisplay = `${startFormatted} - ${endFormatted}`;
                 }
                 
-                const manualBadge = event.manual ? '<span class="manual-badge">Manual</span>' : '';
                 return `
                     <div class="events-list-item">
-                        <span class="events-list-name">${event.name} ${manualBadge}</span>
+                        <span class="events-list-name">${event.name}</span>
                         <span class="events-list-date">${dateDisplay}</span>
                     </div>
                 `;
@@ -1070,104 +975,74 @@
             
             const primaryEvents = [];
             const secondaryEvents = [];
-            const manualEventsForYear = [];
+            const multiDayEvents = [];
             
-            // Collect iCal events - separate primary (dots) and secondary (squares)
+            // Collect iCal events
             ['blessthun', 'youth'].forEach(type => {
                 (events[type] || []).forEach(event => {
-                    if (!event.date) return;
-                    const eventYear = parseInt(event.date.substring(0, 4));
-                    if (eventYear < MIN_YEAR) return;
-                    const pos = getPositionForDate(event.date, year);
-                    if (pos !== null) {
-                        const date = new Date(event.date + 'T12:00:00');
-                        const eventData = {
-                            ...event,
-                            type,
-                            position: pos,
-                            month: monthNames[date.getMonth()],
-                            day: date.getDate()
-                        };
-                        
-                        // Check if primary event
-                        if (event.name === PRIMARY_EVENTS[type]) {
-                            primaryEvents.push(eventData);
-                        } else {
-                            secondaryEvents.push(eventData);
-                        }
-                    }
-                });
-            });
-            
-            // Collect manual events (labels + multi-day pills) - filtered by MIN_YEAR
-            ['blessthun', 'youth'].forEach(type => {
-                (manualEvents[type] || []).forEach(event => {
                     const startDateStr = event.startDate || event.date;
-                    const endDateStr = event.endDate || startDateStr;
                     if (!startDateStr) return;
                     
-                    const startYear = parseInt(startDateStr.substring(0, 4));
-                    if (startYear < MIN_YEAR) return;
+                    const eventYear = parseInt(startDateStr.substring(0, 4));
+                    if (eventYear < MIN_YEAR) return;
                     
-                    const startPos = getPositionForDate(startDateStr, year);
-                    const endPos = getPositionForDate(endDateStr, year);
-                    
-                    // Check if event overlaps with this year
-                    if (startPos !== null || endPos !== null) {
-                        const startDate = new Date(startDateStr + 'T12:00:00');
-                        const endDate = new Date(endDateStr + 'T12:00:00');
+                    // Handle multi-day events
+                    if (event.isMultiDay && event.endDate) {
+                        const startPos = getPositionForDate(startDateStr, year);
+                        const endPos = getPositionForDate(event.endDate, year);
                         
-                        // Clamp positions to year boundaries
-                        const clampedStartPos = startPos !== null ? startPos : 0;
-                        const clampedEndPos = endPos !== null ? endPos : 100;
-                        
-                        // Format date display
-                        let dateDisplay = monthShort[startDate.getMonth()] + ' ' + startDate.getDate();
-                        if (startDateStr !== endDateStr) {
+                        // Check if event overlaps with this year
+                        if (startPos !== null || endPos !== null) {
+                            const startDate = new Date(startDateStr + 'T12:00:00');
+                            const endDate = new Date(event.endDate + 'T12:00:00');
+                            
+                            // Clamp positions to year boundaries
+                            const clampedStartPos = startPos !== null ? startPos : 0;
+                            const clampedEndPos = endPos !== null ? endPos : 100;
+                            
+                            // Format date display
+                            let dateDisplay = monthShort[startDate.getMonth()] + ' ' + startDate.getDate();
                             dateDisplay += ' - ' + monthShort[endDate.getMonth()] + ' ' + endDate.getDate();
+                            
+                            multiDayEvents.push({
+                                ...event,
+                                type,
+                                startPosition: clampedStartPos,
+                                endPosition: clampedEndPos,
+                                dateDisplay
+                            });
                         }
-                        
-                        manualEventsForYear.push({
-                            ...event,
-                            type,
-                            startPosition: clampedStartPos,
-                            endPosition: clampedEndPos,
-                            isMultiDay: startDateStr !== endDateStr,
-                            dateDisplay
-                        });
+                    } else {
+                        // Single-day event
+                        const pos = getPositionForDate(startDateStr, year);
+                        if (pos !== null) {
+                            const date = new Date(startDateStr + 'T12:00:00');
+                            const eventData = {
+                                ...event,
+                                type,
+                                position: pos,
+                                month: monthNames[date.getMonth()],
+                                day: date.getDate()
+                            };
+                            
+                            // Check if primary event
+                            if (event.name === PRIMARY_EVENTS[type]) {
+                                primaryEvents.push(eventData);
+                            } else {
+                                secondaryEvents.push(eventData);
+                            }
+                        }
                     }
                 });
             });
 
-            const hasEvents = primaryEvents.length > 0 || secondaryEvents.length > 0 || manualEventsForYear.length > 0;
+            const hasEvents = primaryEvents.length > 0 || secondaryEvents.length > 0 || multiDayEvents.length > 0;
             emptyEl.style.display = hasEvents ? 'none' : 'block';
-
-            // Assign offsets to manual events to avoid overlap
-            const blessthunManual = manualEventsForYear.filter(e => e.type === 'blessthun');
-            const youthManual = manualEventsForYear.filter(e => e.type === 'youth');
-
-            function assignOffsets(evts) {
-                evts.sort((a, b) => a.startPosition - b.startPosition);
-                evts.forEach((event, i) => {
-                    event.offset = 0;
-                    const eventCenter = event.isMultiDay ? (event.startPosition + event.endPosition) / 2 : event.startPosition;
-                    for (let j = 0; j < i; j++) {
-                        const otherCenter = evts[j].isMultiDay ? (evts[j].startPosition + evts[j].endPosition) / 2 : evts[j].startPosition;
-                        const overlap = Math.abs(otherCenter - eventCenter) < 10;
-                        if (overlap) {
-                            event.offset = Math.min((evts[j].offset || 0) + 1, 2);
-                        }
-                    }
-                });
-            }
-
-            assignOffsets(blessthunManual);
-            assignOffsets(youthManual);
 
             let html = '';
             
             // Render multi-day pills with tooltip
-            manualEventsForYear.filter(e => e.isMultiDay).forEach(event => {
+            multiDayEvents.forEach(event => {
                 const width = Math.max(event.endPosition - event.startPosition, 3);
                 const tooltipText = `${event.dateDisplay}: ${event.name || 'Event'}`;
                 html += `
@@ -1196,23 +1071,6 @@
                     </div>
                 `;
             });
-            
-            // Render single-day manual events with labels
-            manualEventsForYear.filter(e => !e.isMultiDay).forEach(event => {
-                const offsetClass = event.offset > 0 ? ` offset-${event.offset}` : '';
-                const typeClass = `${event.type}-type`;
-                
-                html += `
-                    <div class="manual-event ${typeClass}${offsetClass}" style="left: ${event.startPosition}%;">
-                        <div class="event-label">
-                            <span class="event-month">${event.dateDisplay}</span>
-                            <span class="event-name">${event.name || 'Event'}</span>
-                        </div>
-                        <div class="event-connector"></div>
-                        <div class="event-dot ${event.type}"></div>
-                    </div>
-                `;
-            });
 
             container.innerHTML = html;
         }
@@ -1222,34 +1080,12 @@
             renderTimelineEvents('timeline2-events', 'timeline2-months', 'timeline2-empty', currentYear2);
         }
 
-        // Fetch manual events
-        async function fetchManualEvents() {
-            try {
-                const response = await fetch('/api/manual-events');
-                if (response.ok) {
-                    manualEvents = await response.json();
-                }
-            } catch (err) {
-                console.error('Failed to fetch manual events:', err);
-            }
-        }
-
-        // Get all events (iCal + manual) filtered by year
+        // Get all events filtered by year
         function getAllEvents(type) {
             const icalEvents = events[type] || [];
-            const manual = manualEvents[type] || [];
-            
-            // Normalize iCal events to have startDate
-            const normalizedIcal = icalEvents.map(e => ({
-                ...e,
-                startDate: e.date,
-                endDate: e.date
-            }));
-            
-            const combined = [...normalizedIcal, ...manual];
             
             // Filter to only show events from MIN_YEAR onwards
-            return combined.filter(e => {
+            return icalEvents.filter(e => {
                 const dateStr = e.startDate || e.date;
                 if (!dateStr) return false;
                 const year = parseInt(dateStr.substring(0, 4));
@@ -1260,8 +1096,7 @@
         async function loadData() {
             await Promise.all([
                 fetchCalendar('blessthun'),
-                fetchCalendar('youth'),
-                fetchManualEvents()
+                fetchCalendar('youth')
             ]);
             
             renderEventsList('blessthun');
