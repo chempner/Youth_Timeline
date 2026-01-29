@@ -186,7 +186,7 @@
 
         .timeline-wrapper {
             position: relative;
-            padding: 100px 0 100px 0;
+            padding: 80px 0 80px 0;
         }
 
         .timeline-track {
@@ -463,119 +463,62 @@
         .manual-event.youth-type.offset-1 .event-connector { height: 45px; }
         .manual-event.youth-type.offset-2 .event-connector { height: 70px; }
 
-        /* Multi-day event pill with label */
-        .multiday-event {
-            position: absolute;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            pointer-events: auto;
-            cursor: pointer;
-            z-index: 12;
-        }
-
-        .multiday-event.blessthun-type {
-            bottom: 50%;
-        }
-
-        .multiday-event.youth-type {
-            top: 50%;
-            flex-direction: column-reverse;
-        }
-
-        .multiday-event .event-label {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 6px 10px;
-            border-radius: 6px;
-            max-width: 120px;
-            transition: all 0.2s ease;
-        }
-
-        .multiday-event.blessthun-type .event-label {
-            background: var(--salmon-light);
-            border-left: 3px solid var(--salmon);
-        }
-
-        .multiday-event.youth-type .event-label {
-            background: var(--mint-light);
-            border-left: 3px solid var(--mint);
-        }
-
-        .multiday-event .event-month {
-            font-size: 0.65rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
-        }
-
-        .multiday-event.blessthun-type .event-month {
-            color: var(--salmon-dark);
-        }
-
-        .multiday-event.youth-type .event-month {
-            color: var(--mint-dark);
-        }
-
-        .multiday-event .event-name {
-            font-size: 0.7rem;
-            font-weight: 500;
-            color: var(--text-primary);
-            text-align: center;
-            word-wrap: break-word;
-            max-width: 100px;
-        }
-
-        .multiday-event .event-connector {
-            width: 2px;
-            height: 15px;
-            flex-shrink: 0;
-        }
-
-        .multiday-event.blessthun-type .event-connector {
-            background: var(--salmon);
-        }
-
-        .multiday-event.youth-type .event-connector {
-            background: var(--mint);
-        }
-
-        .multiday-event:hover {
-            z-index: 100;
-        }
-
-        .multiday-event:hover .event-label {
-            transform: scale(1.05);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        /* Offset for overlapping multi-day events */
-        .multiday-event.blessthun-type.offset-1 .event-connector { height: 40px; }
-        .multiday-event.blessthun-type.offset-2 .event-connector { height: 65px; }
-        .multiday-event.youth-type.offset-1 .event-connector { height: 40px; }
-        .multiday-event.youth-type.offset-2 .event-connector { height: 65px; }
-
-        /* The pill bar on the timeline */
+        /* Multi-day event pill */
         .multiday-pill {
             position: absolute;
-            height: 12px;
-            border-radius: 6px;
+            height: 8px;
+            border-radius: 4px;
             z-index: 11;
-            pointer-events: none;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            pointer-events: auto;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
         }
 
         .multiday-pill.blessthun {
             background: var(--salmon);
             top: 50%;
-            transform: translateY(-10px);
+            transform: translateY(-12px);
         }
 
         .multiday-pill.youth {
             background: var(--mint);
             top: 50%;
-            transform: translateY(-2px);
+            transform: translateY(4px);
+        }
+
+        .multiday-pill:hover {
+            z-index: 100;
+            height: 10px;
+            border-radius: 5px;
+        }
+
+        .multiday-pill .event-tooltip {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text-primary);
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .multiday-pill.blessthun .event-tooltip {
+            bottom: 100%;
+            margin-bottom: 8px;
+        }
+
+        .multiday-pill.youth .event-tooltip {
+            top: 100%;
+            margin-top: 8px;
+        }
+
+        .multiday-pill:hover .event-tooltip {
+            opacity: 1;
         }
 
         /* Secondary events (other calendar events) - small squares */
@@ -1223,27 +1166,13 @@
 
             let html = '';
             
-            // Render multi-day pills (the bar on the timeline)
+            // Render multi-day pills with tooltip
             manualEventsForYear.filter(e => e.isMultiDay).forEach(event => {
                 const width = Math.max(event.endPosition - event.startPosition, 3);
+                const tooltipText = `${event.dateDisplay}: ${event.name || 'Event'}`;
                 html += `
-                    <div class="multiday-pill ${event.type}" style="left: ${event.startPosition}%; width: ${width}%;"></div>
-                `;
-            });
-            
-            // Render multi-day event labels (above/below the pill)
-            manualEventsForYear.filter(e => e.isMultiDay).forEach(event => {
-                const offsetClass = event.offset > 0 ? ` offset-${event.offset}` : '';
-                const typeClass = `${event.type}-type`;
-                const centerPosition = (event.startPosition + event.endPosition) / 2;
-                
-                html += `
-                    <div class="multiday-event ${typeClass}${offsetClass}" style="left: ${centerPosition}%; transform: translateX(-50%);">
-                        <div class="event-label">
-                            <span class="event-month">${event.dateDisplay}</span>
-                            <span class="event-name">${event.name || 'Event'}</span>
-                        </div>
-                        <div class="event-connector"></div>
+                    <div class="multiday-pill ${event.type}" style="left: ${event.startPosition}%; width: ${width}%;">
+                        <div class="event-tooltip">${tooltipText}</div>
                     </div>
                 `;
             });
