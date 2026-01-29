@@ -1320,19 +1320,17 @@
 
             let html = '';
             
-            // Render multi-day pills
+            // Render multi-day pills and labels
             multiDayEvents.forEach(event => {
                 const width = Math.max(event.endPosition - event.startPosition, 3);
+                const centerPosition = event.startPosition + (width / 2);
+                
                 html += `
                     <div class="multiday-pill ${event.type}" style="left: ${event.startPosition}%; width: ${width}%;"></div>
                 `;
-            });
-
-            // Render multi-day labels
-            multiDayEvents.forEach(event => {
+                
                 const offsetClass = event.offset > 0 ? ` offset-${event.offset}` : '';
                 const typeClass = `${event.type}-type`;
-                const centerPosition = (event.startPosition + event.endPosition) / 2;
                 
                 html += `
                     <div class="multiday-label ${typeClass}${offsetClass}" style="left: ${centerPosition}%;">
