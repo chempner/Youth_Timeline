@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Event Timeline</title>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         :root {
             --salmon: #FA8072;
@@ -143,9 +145,26 @@
             animation: pulse 1s infinite;
         }
 
+        .download-btn {
+            background: #059669;
+        }
+
+        .download-btn:hover {
+            background: #047857;
+        }
+
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.6; }
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .spin {
+            animation: spin 1s linear infinite;
         }
 
         .last-sync {
@@ -157,6 +176,35 @@
         /* Timeline Styles */
         .timeline-section {
             margin-bottom: 2.5rem;
+        }
+
+        .pdf-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 0 0.5rem;
+        }
+
+        .pdf-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .pdf-legend {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .pdf-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.85rem;
+            font-weight: 500;
         }
 
         .timeline-card {
@@ -383,13 +431,13 @@
         .multiday-pill.blessthun {
             background: var(--salmon);
             top: 50%;
-            transform: translateY(-12px);
+            transform: translateY(-15px);
         }
 
         .multiday-pill.youth {
             background: var(--mint);
             top: 50%;
-            transform: translateY(4px);
+            transform: translateY(7px);
         }
 
         .multiday-pill:hover {
@@ -656,11 +704,26 @@
                     </svg>
                     Resync
                 </button>
+                <button class="resync-btn download-btn" id="download-btn" onclick="downloadPDF()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                        <polyline points="7,10 12,15 17,10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    Download A3
+                </button>
             </div>
             <div class="last-sync" id="last-sync"></div>
         </header>
 
-        <div class="timeline-section">
+        <div class="timeline-section" id="timeline-section">
+            <div class="pdf-header">
+                <h2 class="pdf-title">Event Timeline</h2>
+                <div class="pdf-legend">
+                    <span class="pdf-legend-item"><span class="legend-dot blessthun"></span> BlessThun</span>
+                    <span class="pdf-legend-item"><span class="legend-dot youth"></span> Youth Revival</span>
+                </div>
+            </div>
             <div class="timeline-card">
                 <div class="timeline-header">
                     <span class="year-badge" id="year1-badge">2026</span>
@@ -871,6 +934,78 @@
                     <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
                 </svg>
                 Resync
+            `;
+        }
+
+        // Download timeline as A3 PDF
+        async function downloadPDF() {
+            const btn = document.getElementById('download-btn');
+            btn.disabled = true;
+            btn.innerHTML = `
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                    <polyline points="7,10 12,15 17,10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Generating...
+            `;
+            
+            try {
+                const section = document.getElementById('timeline-section');
+                
+                // Capture at high resolution
+                const canvas = await html2canvas(section, {
+                    scale: 2,
+                    backgroundColor: '#FAFBFC',
+                    logging: false,
+                    useCORS: true
+                });
+                
+                // A3 dimensions in mm (landscape)
+                const a3Width = 420;
+                const a3Height = 297;
+                
+                // Create PDF in landscape A3
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({
+                    orientation: 'landscape',
+                    unit: 'mm',
+                    format: 'a3'
+                });
+                
+                // Calculate scaling to fit A3
+                const imgWidth = canvas.width;
+                const imgHeight = canvas.height;
+                const ratio = Math.min(a3Width / imgWidth, a3Height / imgHeight);
+                
+                const pdfWidth = imgWidth * ratio;
+                const pdfHeight = imgHeight * ratio;
+                
+                // Center on page
+                const x = (a3Width - pdfWidth) / 2;
+                const y = (a3Height - pdfHeight) / 2;
+                
+                // Add image to PDF
+                const imgData = canvas.toDataURL('image/png');
+                pdf.addImage(imgData, 'PNG', x, y, pdfWidth, pdfHeight);
+                
+                // Download
+                pdf.save(`Event-Timeline-${currentYear1}-${currentYear2}.pdf`);
+                
+                showToast('PDF downloaded!', 'success');
+            } catch (err) {
+                console.error('PDF generation failed:', err);
+                showToast('PDF generation failed: ' + err.message, 'error');
+            }
+            
+            btn.disabled = false;
+            btn.innerHTML = `
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                    <polyline points="7,10 12,15 17,10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Download A3
             `;
         }
 
