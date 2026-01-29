@@ -216,6 +216,48 @@
             margin-bottom: 1.5rem;
         }
 
+        .timeline-scroll-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) transparent;
+        }
+
+        .timeline-scroll-container::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .timeline-scroll-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .timeline-scroll-container::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        .timeline-content {
+            min-width: 800px;
+        }
+
+        @media (max-width: 700px) {
+            .timeline-card {
+                padding: 1.5rem 1rem;
+            }
+            
+            .timeline-content {
+                min-width: 700px;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            header h1 {
+                font-size: 1.8rem;
+            }
+        }
+
         .timeline-header {
             display: flex;
             justify-content: center;
@@ -788,16 +830,20 @@
                 <div class="timeline-header">
                     <span class="year-badge" id="year1-badge">2026</span>
                 </div>
-                <div class="timeline-wrapper">
-                    <div class="timeline-track">
-                        <div class="timeline-line">
-                            <div class="timeline-dot-start"></div>
-                            <div class="timeline-dot-end"></div>
+                <div class="timeline-scroll-container">
+                    <div class="timeline-content">
+                        <div class="timeline-wrapper">
+                            <div class="timeline-track">
+                                <div class="timeline-line">
+                                    <div class="timeline-dot-start"></div>
+                                    <div class="timeline-dot-end"></div>
+                                </div>
+                                <div class="month-markers" id="timeline1-months"></div>
+                                <div class="events-container" id="timeline1-events"></div>
+                            </div>
+                            <div class="timeline-empty" id="timeline1-empty">No events for this year</div>
                         </div>
-                        <div class="month-markers" id="timeline1-months"></div>
-                        <div class="events-container" id="timeline1-events"></div>
                     </div>
-                    <div class="timeline-empty" id="timeline1-empty">No events for this year</div>
                 </div>
             </div>
 
@@ -805,16 +851,20 @@
                 <div class="timeline-header">
                     <span class="year-badge" id="year2-badge">2027</span>
                 </div>
-                <div class="timeline-wrapper">
-                    <div class="timeline-track">
-                        <div class="timeline-line">
-                            <div class="timeline-dot-start"></div>
-                            <div class="timeline-dot-end"></div>
+                <div class="timeline-scroll-container">
+                    <div class="timeline-content">
+                        <div class="timeline-wrapper">
+                            <div class="timeline-track">
+                                <div class="timeline-line">
+                                    <div class="timeline-dot-start"></div>
+                                    <div class="timeline-dot-end"></div>
+                                </div>
+                                <div class="month-markers" id="timeline2-months"></div>
+                                <div class="events-container" id="timeline2-events"></div>
+                            </div>
+                            <div class="timeline-empty" id="timeline2-empty">No events for this year</div>
                         </div>
-                        <div class="month-markers" id="timeline2-months"></div>
-                        <div class="events-container" id="timeline2-events"></div>
                     </div>
-                    <div class="timeline-empty" id="timeline2-empty">No events for this year</div>
                 </div>
             </div>
         </div>
