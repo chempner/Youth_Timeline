@@ -162,6 +162,11 @@ app.use(express.static('public'));
 // Serve calendar files
 app.use('/calendars', express.static(CALENDARS_DIR));
 
+// Overview page route
+app.get('/overview', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'overview.html'));
+});
+
 // API: Get status
 app.get('/api/status', (req, res) => {
     res.json({
