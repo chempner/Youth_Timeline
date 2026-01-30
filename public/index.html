@@ -21,6 +21,18 @@
             --text-secondary: #6B7280;
             --border: #E5E7EB;
             --shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+            --today: #3B82F6;
+        }
+
+        [data-theme="dark"] {
+            --bg: #0F172A;
+            --card-bg: #1E293B;
+            --text-primary: #F1F5F9;
+            --text-secondary: #94A3B8;
+            --border: #334155;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+            --salmon-light: rgba(250, 128, 114, 0.15);
+            --mint-light: rgba(62, 180, 137, 0.15);
         }
 
         * {
@@ -35,6 +47,7 @@
             color: var(--text-primary);
             min-height: 100vh;
             padding: 2rem;
+            transition: background 0.3s ease, color 0.3s ease;
         }
 
         .container {
@@ -45,8 +58,8 @@
 
         header {
             text-align: center;
-            margin-bottom: 2.5rem;
-            padding: 1.5rem 0;
+            margin-bottom: 1.5rem;
+            padding: 1rem 0;
         }
 
         h1 {
@@ -55,75 +68,150 @@
             font-weight: 700;
             color: var(--text-primary);
             margin-bottom: 0.5rem;
-            letter-spacing: -0.02em;
         }
 
         .subtitle {
             color: var(--text-secondary);
-            font-size: 1.05rem;
+            font-size: 1rem;
+        }
+
+        /* Countdown Banner */
+        .countdown-banner {
+            background: linear-gradient(135deg, var(--salmon), var(--mint));
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            margin: 1.5rem auto;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            animation: fadeInUp 0.5s ease;
+        }
+
+        .countdown-banner.youth-next {
+            background: linear-gradient(135deg, var(--mint), var(--mint-dark));
+        }
+
+        .countdown-banner.blessthun-next {
+            background: linear-gradient(135deg, var(--salmon), var(--salmon-dark));
+        }
+
+        .countdown-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+
+        .countdown-event {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0.25rem 0;
+        }
+
+        .countdown-time {
+            font-size: 1.6rem;
+            font-weight: 700;
+        }
+
+        /* Controls */
+        .controls-bar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin: 1.5rem 0;
         }
 
         .legend {
             display: flex;
-            justify-content: center;
-            gap: 2rem;
-            margin-top: 1.25rem;
+            gap: 0.5rem;
         }
 
         .legend-item {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.4rem;
             font-weight: 500;
+            font-size: 0.85rem;
+            cursor: pointer;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            transition: all 0.2s ease;
+            user-select: none;
+            border: 1px solid transparent;
+        }
+
+        .legend-item:hover {
+            background: var(--border);
+        }
+
+        .legend-item.disabled {
+            opacity: 0.4;
+            text-decoration: line-through;
         }
 
         .legend-dot {
-            width: 14px;
-            height: 14px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
         }
 
         .legend-dot.blessthun { background: var(--salmon); }
         .legend-dot.youth { background: var(--mint); }
 
-        /* Status bar */
-        .status-bar {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 1.5rem;
-            margin-top: 1rem;
-            font-size: 0.85rem;
+        .search-box {
+            position: relative;
         }
 
-        .status-item {
+        .search-input {
+            padding: 0.5rem 1rem 0.5rem 2rem;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            background: var(--card-bg);
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            width: 160px;
+            transition: all 0.2s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--salmon);
+            width: 200px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.6rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            width: 14px;
+            height: 14px;
+        }
+
+        .year-picker {
             display: flex;
             align-items: center;
             gap: 0.4rem;
-            color: var(--text-secondary);
         }
 
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #D1D5DB;
+        .year-select {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--card-bg);
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            cursor: pointer;
         }
 
-        .status-dot.loaded {
-            background: #10B981;
-        }
-
-        .status-dot.error {
-            background: #EF4444;
-        }
-
-        .resync-btn {
+        .btn {
             background: var(--text-primary);
             color: white;
             border: none;
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
+            padding: 0.5rem 0.9rem;
+            border-radius: 8px;
             font-size: 0.8rem;
             font-weight: 500;
             cursor: pointer;
@@ -133,50 +221,62 @@
             gap: 0.3rem;
         }
 
-        .resync-btn:hover {
-            background: #374151;
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
         }
 
-        .resync-btn:disabled {
+        .btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
+            transform: none;
         }
 
-        .resync-btn.syncing {
-            animation: pulse 1s infinite;
+        .btn-success { background: #059669; }
+        .btn-success:hover { background: #047857; }
+
+        .btn-icon {
+            background: var(--card-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
         }
 
-        .download-btn {
-            background: #059669;
+        .btn-icon:hover {
+            background: var(--border);
         }
 
-        .download-btn:hover {
-            background: #047857;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
-        }
-
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .spin {
-            animation: spin 1s linear infinite;
-        }
-
-        .last-sync {
+        .status-bar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
             font-size: 0.75rem;
             color: var(--text-secondary);
             margin-top: 0.5rem;
         }
 
-        /* Timeline Styles */
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #D1D5DB;
+            display: inline-block;
+            margin-right: 0.25rem;
+        }
+
+        .status-dot.loaded { background: #10B981; }
+        .status-dot.error { background: #EF4444; }
+
+        /* Timeline */
         .timeline-section {
-            margin-bottom: 2.5rem;
+            margin-bottom: 2rem;
         }
 
         .pdf-header {
@@ -189,32 +289,32 @@
 
         .pdf-title {
             font-family: 'Playfair Display', serif;
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             font-weight: 700;
             color: var(--text-primary);
-            margin: 0;
         }
 
         .pdf-legend {
             display: flex;
-            gap: 1.5rem;
+            gap: 1rem;
+            font-size: 0.8rem;
         }
 
         .pdf-legend-item {
             display: flex;
             align-items: center;
-            gap: 0.4rem;
-            font-size: 0.85rem;
-            font-weight: 500;
+            gap: 0.3rem;
         }
 
         .timeline-card {
             background: var(--card-bg);
             border-radius: 16px;
-            padding: 2rem 2.5rem;
+            padding: 1.5rem;
             box-shadow: var(--shadow);
             border: 1px solid var(--border);
             margin-bottom: 1.5rem;
+            animation: fadeInUp 0.5s ease;
+            transition: all 0.3s ease;
         }
 
         .timeline-scroll-container {
@@ -225,16 +325,12 @@
         }
 
         .timeline-scroll-container::-webkit-scrollbar {
-            height: 8px;
-        }
-
-        .timeline-scroll-container::-webkit-scrollbar-track {
-            background: transparent;
+            height: 6px;
         }
 
         .timeline-scroll-container::-webkit-scrollbar-thumb {
             background: var(--border);
-            border-radius: 4px;
+            border-radius: 3px;
         }
 
         .timeline-content {
@@ -242,42 +338,38 @@
         }
 
         @media (max-width: 700px) {
-            .timeline-card {
-                padding: 1.5rem 1rem;
-            }
-            
-            .timeline-content {
-                min-width: 900px;
-            }
-            
-            .container {
-                padding: 1rem;
-            }
-            
-            header h1 {
-                font-size: 1.8rem;
-            }
+            .timeline-card { padding: 1rem; }
+            .timeline-content { min-width: 900px; }
+            .container { padding: 1rem; }
+            body { padding: 1rem; }
+            h1 { font-size: 1.8rem; }
+            .controls-bar { gap: 0.5rem; }
+            .search-input { width: 120px; }
+            .search-input:focus { width: 150px; }
         }
 
         .timeline-header {
             display: flex;
             justify-content: center;
-            align-items: center;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
         }
 
         .year-badge {
             background: linear-gradient(135deg, var(--text-primary), #374151);
             color: white;
-            padding: 0.5rem 1.5rem;
+            padding: 0.4rem 1.2rem;
             border-radius: 20px;
             font-weight: 600;
-            font-size: 1.1rem;
+            font-size: 1rem;
+        }
+
+        [data-theme="dark"] .year-badge {
+            background: linear-gradient(135deg, #475569, #334155);
         }
 
         .timeline-wrapper {
             position: relative;
-            padding: 110px 0 110px 0;
+            padding: 100px 0;
         }
 
         .timeline-track {
@@ -287,91 +379,131 @@
 
         .timeline-line {
             height: 4px;
-            background: linear-gradient(90deg, var(--border) 0%, #D1D5DB 50%, var(--border) 100%);
+            background: linear-gradient(90deg, var(--salmon), var(--mint));
             border-radius: 2px;
             position: relative;
         }
 
-        .timeline-dot-start,
-        .timeline-dot-end {
+        .timeline-dot-start, .timeline-dot-end {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            width: 10px;
-            height: 10px;
-            background: var(--text-secondary);
+        }
+
+        .timeline-dot-start {
+            left: -5px;
+            background: var(--salmon);
+        }
+
+        .timeline-dot-end {
+            right: -5px;
+            background: var(--mint);
+        }
+
+        .timeline-empty {
+            text-align: center;
+            color: var(--text-secondary);
+            font-style: italic;
+            padding: 2rem;
+        }
+
+        /* Today Marker */
+        .today-marker {
+            position: absolute;
+            top: -25px;
+            bottom: -25px;
+            width: 2px;
+            background: var(--today);
+            z-index: 20;
+            transform: translateX(-50%);
+        }
+
+        .today-marker::before {
+            content: 'TODAY';
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--today);
+            color: white;
+            font-size: 0.55rem;
+            font-weight: 700;
+            padding: 2px 5px;
+            border-radius: 3px;
+            white-space: nowrap;
+        }
+
+        .today-marker::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 6px;
+            background: var(--today);
             border-radius: 50%;
         }
 
-        .timeline-dot-start { left: 0; }
-        .timeline-dot-end { right: 0; }
-
-        /* Month markers */
+        /* Month Markers */
         .month-markers {
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            bottom: 0;
+            height: 100%;
             pointer-events: none;
         }
 
         .month-marker {
             position: absolute;
-            top: 50%;
             transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            top: 100%;
+            margin-top: 6px;
         }
 
         .month-marker-line {
             width: 1px;
-            height: 12px;
+            height: 10px;
             background: var(--border);
-            margin-top: -6px;
         }
 
         .month-marker-label {
-            position: absolute;
-            top: 14px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             font-weight: 600;
             color: var(--text-secondary);
             text-transform: uppercase;
-            letter-spacing: 0.03em;
-            white-space: nowrap;
+            margin-top: 3px;
         }
 
-        .year-label {
-            position: absolute;
-            top: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            display: none;
-        }
-
-        .year-label-start { left: 0; transform: translateX(-50%); }
-        .year-label-end { right: 0; transform: translateX(50%); }
-
+        /* Events */
         .events-container {
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            bottom: 0;
+            height: 100%;
             pointer-events: none;
         }
 
-        /* Primary events (BlessThun/Youth Revival) - dots */
         .event-marker {
             position: absolute;
             transform: translateX(-50%);
             pointer-events: auto;
             cursor: pointer;
             z-index: 10;
+            transition: transform 0.2s ease;
+        }
+
+        .event-marker:hover {
+            transform: translateX(-50%) scale(1.2);
+            z-index: 100;
         }
 
         .event-marker.blessthun {
@@ -380,14 +512,13 @@
             margin-top: -4px;
         }
 
-        .event-marker.youth {
-            top: 50%;
-            transform: translate(-50%, 0%);
-            margin-top: 4px;
+        .event-marker.blessthun:hover {
+            transform: translate(-50%, -100%) scale(1.2);
         }
 
-        .event-marker:hover {
-            z-index: 100;
+        .event-marker.youth {
+            top: 50%;
+            margin-top: 4px;
         }
 
         .event-dot {
@@ -396,20 +527,10 @@
             border-radius: 50%;
             border: 3px solid white;
             box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-            transition: transform 0.2s ease;
         }
 
-        .event-marker:hover .event-dot {
-            transform: scale(1.3);
-        }
-
-        .event-dot.blessthun {
-            background: var(--salmon);
-        }
-
-        .event-dot.youth {
-            background: var(--mint);
-        }
+        .event-dot.blessthun { background: var(--salmon); }
+        .event-dot.youth { background: var(--mint); }
 
         .event-tooltip {
             position: absolute;
@@ -417,50 +538,82 @@
             transform: translateX(-50%);
             background: var(--text-primary);
             color: white;
-            padding: 0.5rem 0.75rem;
+            padding: 0.4rem 0.6rem;
             border-radius: 6px;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 1000;
+        }
+
+        .event-marker.blessthun .event-tooltip { bottom: 100%; margin-bottom: 6px; }
+        .event-marker.youth .event-tooltip { top: 100%; margin-top: 6px; }
+        .event-marker:hover .event-tooltip { opacity: 1; }
+
+        /* Secondary Events */
+        .secondary-event {
+            position: absolute;
+            transform: translateX(-50%);
+            pointer-events: auto;
+            cursor: pointer;
+            z-index: 8;
+            transition: transform 0.2s ease;
+        }
+
+        .secondary-event:hover {
+            z-index: 100;
+            transform: translateX(-50%) scale(1.3);
+        }
+
+        .secondary-event.blessthun {
+            top: 50%;
+            transform: translate(-50%, -100%);
+            margin-top: -2px;
+        }
+
+        .secondary-event.blessthun:hover {
+            transform: translate(-50%, -100%) scale(1.3);
+        }
+
+        .secondary-event.youth {
+            top: 50%;
+            margin-top: 2px;
+        }
+
+        .event-square {
+            width: 8px;
+            height: 8px;
+            border-radius: 2px;
+            border: 2px solid white;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+            opacity: 0.7;
+        }
+
+        .event-square.blessthun { background: var(--salmon); }
+        .event-square.youth { background: var(--mint); }
+
+        .secondary-event .event-tooltip {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text-primary);
+            color: white;
+            padding: 0.4rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.7rem;
             white-space: nowrap;
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.2s ease;
         }
 
-        .event-marker.blessthun .event-tooltip {
-            bottom: 100%;
-            margin-bottom: 8px;
-        }
+        .secondary-event.blessthun .event-tooltip { bottom: 100%; margin-bottom: 6px; }
+        .secondary-event.youth .event-tooltip { top: 100%; margin-top: 6px; }
+        .secondary-event:hover .event-tooltip { opacity: 1; }
 
-        .event-marker.blessthun .event-tooltip::after {
-            content: '';
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            border: 5px solid transparent;
-            border-top-color: var(--text-primary);
-        }
-
-        .event-marker.youth .event-tooltip {
-            top: 100%;
-            margin-top: 8px;
-        }
-
-        .event-marker.youth .event-tooltip::after {
-            content: '';
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            border: 5px solid transparent;
-            border-bottom-color: var(--text-primary);
-        }
-
-        .event-marker:hover .event-tooltip {
-            opacity: 1;
-        }
-
-        /* Multi-day event pill */
+        /* Multi-day */
         .multiday-pill {
             position: absolute;
             height: 8px;
@@ -482,7 +635,6 @@
             transform: translateY(7px);
         }
 
-        /* Multi-day event label (above/below pill) */
         .multiday-label {
             position: absolute;
             transform: translateX(-50%);
@@ -492,6 +644,12 @@
             pointer-events: auto;
             cursor: pointer;
             z-index: 15;
+            transition: transform 0.2s ease;
+        }
+
+        .multiday-label:hover {
+            z-index: 100;
+            transform: translateX(-50%) scale(1.05);
         }
 
         .multiday-label.blessthun-type {
@@ -507,25 +665,20 @@
 
         .multiday-label .event-connector {
             width: 2px;
-            height: 25px;
+            height: 22px;
             flex-shrink: 0;
         }
 
-        .multiday-label.blessthun-type .event-connector {
-            background: var(--salmon);
-        }
-
-        .multiday-label.youth-type .event-connector {
-            background: var(--mint);
-        }
+        .multiday-label.blessthun-type .event-connector { background: var(--salmon); }
+        .multiday-label.youth-type .event-connector { background: var(--mint); }
 
         .multiday-label .event-label {
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 6px 10px;
+            padding: 5px 8px;
             border-radius: 6px;
-            max-width: 120px;
+            max-width: 110px;
             transition: all 0.2s ease;
         }
 
@@ -540,240 +693,273 @@
         }
 
         .multiday-label .event-month {
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.03em;
         }
 
-        .multiday-label.blessthun-type .event-month {
-            color: var(--salmon-dark);
-        }
-
-        .multiday-label.youth-type .event-month {
-            color: var(--mint-dark);
-        }
+        .multiday-label.blessthun-type .event-month { color: var(--salmon-dark); }
+        .multiday-label.youth-type .event-month { color: var(--mint-dark); }
 
         .multiday-label .event-name {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             font-weight: 500;
             color: var(--text-primary);
             text-align: center;
             word-wrap: break-word;
-            max-width: 100px;
-        }
-
-        .multiday-label:hover {
-            z-index: 100;
+            max-width: 95px;
         }
 
         .multiday-label:hover .event-label {
-            transform: scale(1.05);
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        /* Offset for overlapping multi-day labels */
-        .multiday-label.blessthun-type.offset-1 .event-connector { height: 55px; }
-        .multiday-label.blessthun-type.offset-2 .event-connector { height: 85px; }
-        .multiday-label.youth-type.offset-1 .event-connector { height: 55px; }
-        .multiday-label.youth-type.offset-2 .event-connector { height: 85px; }
+        .multiday-label.blessthun-type.offset-1 .event-connector { height: 50px; }
+        .multiday-label.blessthun-type.offset-2 .event-connector { height: 78px; }
+        .multiday-label.youth-type.offset-1 .event-connector { height: 50px; }
+        .multiday-label.youth-type.offset-2 .event-connector { height: 78px; }
 
-        /* Secondary events (other calendar events) - small squares */
-        .secondary-event {
-            position: absolute;
-            transform: translateX(-50%);
-            pointer-events: auto;
-            cursor: pointer;
-            z-index: 8;
-        }
-
-        .secondary-event.blessthun {
-            top: 50%;
-            transform: translate(-50%, -100%);
-            margin-top: -2px;
-        }
-
-        .secondary-event.youth {
-            top: 50%;
-            transform: translate(-50%, 0%);
-            margin-top: 2px;
-        }
-
-        .secondary-event:hover {
-            z-index: 100;
-        }
-
-        .event-square {
-            width: 8px;
-            height: 8px;
-            border-radius: 2px;
-            border: 2px solid white;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.15);
-            transition: transform 0.2s ease;
-        }
-
-        .secondary-event:hover .event-square {
-            transform: scale(1.4);
-        }
-
-        .event-square.blessthun {
-            background: var(--salmon);
-            opacity: 0.7;
-        }
-
-        .event-square.youth {
-            background: var(--mint);
-            opacity: 0.7;
-        }
-
-        .secondary-event .event-tooltip {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--text-primary);
-            color: white;
-            padding: 0.5rem 0.75rem;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            white-space: nowrap;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s ease;
-        }
-
-        .secondary-event.blessthun .event-tooltip {
-            bottom: 100%;
-            margin-bottom: 8px;
-        }
-
-        .secondary-event.youth .event-tooltip {
-            top: 100%;
-            margin-top: 8px;
-        }
-
-        .secondary-event:hover .event-tooltip {
-            opacity: 1;
-        }
-
-        .timeline-empty {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            white-space: nowrap;
-        }
-
-        /* Event lists */
+        /* Lists */
         .lists-wrapper {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
         }
 
-        @media (max-width: 900px) {
+        @media (max-width: 700px) {
             .lists-wrapper { grid-template-columns: 1fr; }
         }
 
         .list-card {
             background: var(--card-bg);
             border-radius: 16px;
-            padding: 1.5rem;
+            padding: 1.25rem;
             box-shadow: var(--shadow);
             border: 1px solid var(--border);
+            animation: fadeInUp 0.5s ease;
+            transition: all 0.3s ease;
         }
 
-        .list-card.blessthun {
-            border-top: 4px solid var(--salmon);
-        }
-
-        .list-card.youth {
-            border-top: 4px solid var(--mint);
-        }
+        .list-card.blessthun { border-top: 4px solid var(--salmon); }
+        .list-card.youth { border-top: 4px solid var(--mint); }
 
         .list-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
         }
 
         .list-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.25rem;
+            font-size: 1rem;
             font-weight: 600;
         }
 
         .event-count {
-            font-size: 0.85rem;
+            background: var(--border);
+            padding: 0.2rem 0.6rem;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 500;
             color: var(--text-secondary);
         }
 
         .events-list {
-            max-height: 250px;
+            max-height: 280px;
             overflow-y: auto;
-            border: 1px solid var(--border);
-            border-radius: 8px;
         }
 
         .events-list-item {
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid var(--border);
-            font-size: 0.9rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 0.6rem 0.4rem;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background 0.2s ease;
+            border-radius: 4px;
+            margin: 0 -0.4rem;
         }
 
-        .events-list-item:last-child {
-            border-bottom: none;
-        }
+        .events-list-item:hover { background: var(--border); }
+        .events-list-item:last-child { border-bottom: none; }
 
         .events-list-name {
             font-weight: 500;
+            font-size: 0.85rem;
         }
 
         .events-list-date {
+            font-size: 0.75rem;
             color: var(--text-secondary);
-            font-size: 0.8rem;
         }
 
         .events-list-empty {
-            padding: 2rem;
             text-align: center;
             color: var(--text-secondary);
+            padding: 1rem;
+            font-size: 0.85rem;
         }
 
-        /* Toast notification */
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            padding: 1rem;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            max-width: 400px;
+            width: 100%;
+            transform: translateY(20px) scale(0.95);
+            transition: transform 0.3s ease;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .modal-overlay.active .modal {
+            transform: translateY(0) scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .modal-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            line-height: 1;
+        }
+
+        .modal-close:hover { color: var(--text-primary); }
+
+        .modal-badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .modal-badge.blessthun {
+            background: var(--salmon-light);
+            color: var(--salmon-dark);
+        }
+
+        .modal-badge.youth {
+            background: var(--mint-light);
+            color: var(--mint-dark);
+        }
+
+        .modal-date {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .modal-actions .btn {
+            flex: 1;
+            justify-content: center;
+        }
+
+        /* Toast */
         .toast {
             position: fixed;
-            bottom: 2rem;
-            right: 2rem;
+            bottom: 1.5rem;
+            right: 1.5rem;
             background: var(--text-primary);
             color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 500;
+            padding: 0.75rem 1.25rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            transform: translateY(100px);
             opacity: 0;
-            transform: translateY(10px);
             transition: all 0.3s ease;
-            pointer-events: none;
-            z-index: 1000;
+            z-index: 2000;
+            font-size: 0.85rem;
         }
 
         .toast.show {
-            opacity: 1;
             transform: translateY(0);
+            opacity: 1;
         }
 
-        .toast.success {
-            background: #10B981;
+        .toast.success { background: #059669; }
+        .toast.error { background: #DC2626; }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .toast.error {
-            background: #EF4444;
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
+
+        .spin { animation: spin 1s linear infinite; }
+
+        /* Notification prompt */
+        .notification-prompt {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            margin: 1rem auto;
+            max-width: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            animation: fadeInUp 0.5s ease;
+            font-size: 0.85rem;
+        }
+
+        .notification-prompt.hidden { display: none; }
     </style>
 </head>
 <body>
@@ -781,43 +967,73 @@
         <header>
             <h1>Event Timeline</h1>
             <p class="subtitle">Two-Year Overview</p>
-            <div class="legend">
-                <div class="legend-item">
-                    <div class="legend-dot blessthun"></div>
-                    <span>BlessThun Events</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-dot youth"></div>
-                    <span>Youth Revival Events</span>
-                </div>
+            
+            <div id="countdown-banner" class="countdown-banner" style="display: none;">
+                <div class="countdown-label">Next Event</div>
+                <div class="countdown-event" id="countdown-event"></div>
+                <div class="countdown-time" id="countdown-time"></div>
             </div>
-            <div class="status-bar">
-                <div class="status-item">
-                    <div class="status-dot" id="blessthun-status"></div>
+        </header>
+
+        <div id="notification-prompt" class="notification-prompt hidden">
+            <span>🔔 Get notified before events?</span>
+            <div style="display: flex; gap: 0.4rem;">
+                <button class="btn" onclick="requestNotifications()">Enable</button>
+                <button class="btn-icon" onclick="dismissNotifications()">✕</button>
+            </div>
+        </div>
+
+        <div class="controls-bar">
+            <div class="legend">
+                <div class="legend-item" id="filter-blessthun" onclick="toggleFilter('blessthun')">
+                    <div class="legend-dot blessthun"></div>
                     <span>BlessThun</span>
                 </div>
-                <div class="status-item">
-                    <div class="status-dot" id="youth-status"></div>
+                <div class="legend-item" id="filter-youth" onclick="toggleFilter('youth')">
+                    <div class="legend-dot youth"></div>
                     <span>Youth Revival</span>
                 </div>
-                <button class="resync-btn" id="resync-btn" onclick="manualResync()">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M23 4v6h-6M1 20v-6h6"/>
-                        <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
-                    </svg>
-                    Resync
-                </button>
-                <button class="resync-btn download-btn" id="download-btn" onclick="downloadPDF()">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-                        <polyline points="7,10 12,15 17,10"/>
-                        <line x1="12" y1="15" x2="12" y2="3"/>
-                    </svg>
-                    Download A3
-                </button>
             </div>
-            <div class="last-sync" id="last-sync"></div>
-        </header>
+
+            <div class="search-box">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+                </svg>
+                <input type="text" class="search-input" placeholder="Search..." oninput="handleSearch(this.value)">
+            </div>
+
+            <div class="year-picker">
+                <select class="year-select" id="year1-select" onchange="changeYear(1, this.value)"></select>
+                <span style="color: var(--text-secondary);">&</span>
+                <select class="year-select" id="year2-select" onchange="changeYear(2, this.value)"></select>
+            </div>
+
+            <button class="btn" id="resync-btn" onclick="manualResync()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+                </svg>
+                Sync
+            </button>
+
+            <button class="btn btn-success" onclick="downloadPDF()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                PDF
+            </button>
+
+            <button class="btn-icon" onclick="toggleDarkMode()" title="Toggle dark mode">
+                <svg id="theme-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="status-bar">
+            <span><span class="status-dot" id="blessthun-status"></span>BlessThun</span>
+            <span><span class="status-dot" id="youth-status"></span>Youth Revival</span>
+            <span id="last-sync"></span>
+        </div>
 
         <div class="timeline-section" id="timeline-section">
             <div class="pdf-header">
@@ -827,6 +1043,7 @@
                     <span class="pdf-legend-item"><span class="legend-dot youth"></span> Youth Revival</span>
                 </div>
             </div>
+            
             <div class="timeline-card">
                 <div class="timeline-header">
                     <span class="year-badge" id="year1-badge">2026</span>
@@ -893,525 +1110,346 @@
         </div>
     </div>
 
+    <!-- Modal -->
+    <div class="modal-overlay" id="event-modal" onclick="closeModal(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-title">Event Name</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <span class="modal-badge" id="modal-badge">BlessThun</span>
+            <div class="modal-date" id="modal-date">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                <span id="modal-date-text">January 15, 2026</span>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-success" onclick="addToCalendar()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    Add to Calendar
+                </button>
+                <button class="btn" onclick="closeModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
     <div class="toast" id="toast"></div>
 
     <script>
-        // Configuration
-        const currentYear1 = 2026;
-        const currentYear2 = 2027;
-        const MIN_YEAR = 2026; // Only show events from this year onwards
-        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-        const monthShort = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        
-        // Primary events get dots, others get squares
-        const PRIMARY_EVENTS = {
-            blessthun: 'BlessThun',
-            youth: 'Youth Revival'
-        };
+        const MIN_YEAR = 2026;
+        const YEAR_RANGE = [2025, 2026, 2027, 2028, 2029, 2030];
+        const PRIMARY_EVENTS = { 'blessthun': 'BlessThun', 'youth': 'Youth Revival' };
+        const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        const monthShort = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-        // State
-        let events = {
-            blessthun: [],
-            youth: []
-        };
+        let events = { blessthun: [], youth: [] };
+        let currentYear1 = new Date().getFullYear();
+        let currentYear2 = currentYear1 + 1;
+        let filters = { blessthun: true, youth: true };
+        let searchQuery = '';
+        let currentModalEvent = null;
+        let darkMode = localStorage.getItem('darkMode') === 'true';
 
-        // Toast notification
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.className = `toast ${type} show`;
-            setTimeout(() => toast.classList.remove('show'), 3000);
-        }
+        document.addEventListener('DOMContentLoaded', () => {
+            initYearPickers();
+            loadData();
+            updateStatus();
+            initDarkMode();
+            checkNotificationPermission();
+            setInterval(updateCountdown, 60000);
+        });
 
-        // Parse iCal date and convert UTC to Zurich timezone
-        function parseICalDate(dateStr) {
-            if (!dateStr) return null;
-            
-            // Date only (YYYYMMDD) - all-day event
-            if (dateStr.length === 8) {
-                const y = parseInt(dateStr.substring(0, 4));
-                const m = parseInt(dateStr.substring(4, 6)) - 1;
-                const d = parseInt(dateStr.substring(6, 8));
-                const date = new Date(y, m, d, 12, 0, 0); // noon to avoid timezone issues
-                date.isAllDay = true;
-                return date;
+        function initDarkMode() {
+            if (darkMode) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                updateThemeIcon();
             }
-            
-            // Date with time (YYYYMMDDTHHMMSS or YYYYMMDDTHHMMSSZ)
-            if (dateStr.includes('T')) {
-                const isUTC = dateStr.endsWith('Z');
-                const cleanDate = dateStr.replace('Z', '');
-                const y = parseInt(cleanDate.substring(0, 4));
-                const m = parseInt(cleanDate.substring(4, 6)) - 1;
-                const d = parseInt(cleanDate.substring(6, 8));
-                const h = parseInt(cleanDate.substring(9, 11)) || 0;
-                const min = parseInt(cleanDate.substring(11, 13)) || 0;
-                const s = parseInt(cleanDate.substring(13, 15)) || 0;
-                
-                if (isUTC) {
-                    // Convert UTC to Zurich timezone
-                    const utcDate = new Date(Date.UTC(y, m, d, h, min, s));
-                    const zurichDate = new Date(utcDate.toLocaleString('en-US', { timeZone: 'Europe/Zurich' }));
-                    return zurichDate;
-                } else {
-                    // Already local time
-                    return new Date(y, m, d, h, min, s);
-                }
+        }
+
+        function toggleDarkMode() {
+            darkMode = !darkMode;
+            localStorage.setItem('darkMode', darkMode);
+            document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : '');
+            updateThemeIcon();
+        }
+
+        function updateThemeIcon() {
+            const icon = document.getElementById('theme-icon');
+            icon.innerHTML = darkMode 
+                ? '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>'
+                : '<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>';
+        }
+
+        function checkNotificationPermission() {
+            if ('Notification' in window && Notification.permission === 'default' && !localStorage.getItem('notificationsDismissed')) {
+                document.getElementById('notification-prompt').classList.remove('hidden');
             }
-            
-            return new Date(dateStr);
         }
 
-        // Format date to YYYY-MM-DD string
-        function formatDateStr(date) {
-            const y = date.getFullYear();
-            const m = String(date.getMonth() + 1).padStart(2, '0');
-            const d = String(date.getDate()).padStart(2, '0');
-            return `${y}-${m}-${d}`;
+        function requestNotifications() {
+            Notification.requestPermission().then(p => {
+                document.getElementById('notification-prompt').classList.add('hidden');
+                if (p === 'granted') showToast('Notifications enabled!', 'success');
+            });
         }
 
-        // Parse iCal data
-        function parseIcal(icalData) {
-            const events = [];
-            const lines = icalData.split(/\r?\n/);
+        function dismissNotifications() {
+            localStorage.setItem('notificationsDismissed', 'true');
+            document.getElementById('notification-prompt').classList.add('hidden');
+        }
+
+        function initYearPickers() {
+            const s1 = document.getElementById('year1-select'), s2 = document.getElementById('year2-select');
+            YEAR_RANGE.forEach(y => {
+                s1.innerHTML += `<option value="${y}" ${y===currentYear1?'selected':''}>${y}</option>`;
+                s2.innerHTML += `<option value="${y}" ${y===currentYear2?'selected':''}>${y}</option>`;
+            });
+        }
+
+        function changeYear(t, y) {
+            y = parseInt(y);
+            if (t===1) { currentYear1=y; document.getElementById('year1-badge').textContent=y; }
+            else { currentYear2=y; document.getElementById('year2-badge').textContent=y; }
+            renderAllTimelines();
+        }
+
+        function toggleFilter(type) {
+            filters[type] = !filters[type];
+            document.getElementById(`filter-${type}`).classList.toggle('disabled', !filters[type]);
+            renderAllTimelines();
+            renderEventsList('blessthun');
+            renderEventsList('youth');
+        }
+
+        function handleSearch(q) {
+            searchQuery = q.toLowerCase();
+            renderAllTimelines();
+            renderEventsList('blessthun');
+            renderEventsList('youth');
+        }
+
+        function matchesSearch(e) { return !searchQuery || e.name.toLowerCase().includes(searchQuery); }
+
+        function showToast(msg, type='success') {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = `toast ${type} show`;
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        function updateCountdown() {
+            const all = [...getAllEvents('blessthun'), ...getAllEvents('youth')];
+            const now = new Date();
+            const upcoming = all.filter(e => new Date(e.startDate+'T00:00:00') > now).sort((a,b) => a.startDate.localeCompare(b.startDate))[0];
+            const banner = document.getElementById('countdown-banner');
             
-            let currentEvent = null;
+            if (!upcoming) { banner.style.display = 'none'; return; }
             
-            for (let i = 0; i < lines.length; i++) {
+            const eventDate = new Date(upcoming.startDate+'T00:00:00');
+            const diffDays = Math.ceil((eventDate - now) / (1000*60*60*24));
+            
+            banner.style.display = 'block';
+            banner.className = `countdown-banner ${upcoming.type}-next`;
+            document.getElementById('countdown-event').textContent = upcoming.name;
+            document.getElementById('countdown-time').textContent = diffDays === 0 ? 'Today!' : diffDays === 1 ? 'Tomorrow!' : `In ${diffDays} days`;
+        }
+
+        function parseICalDate(s) {
+            if (!s) return null;
+            if (s.length === 8) return new Date(parseInt(s.slice(0,4)), parseInt(s.slice(4,6))-1, parseInt(s.slice(6,8)), 12);
+            if (s.includes('T')) {
+                const isUTC = s.endsWith('Z');
+                const c = s.replace('Z','');
+                const d = new Date(parseInt(c.slice(0,4)), parseInt(c.slice(4,6))-1, parseInt(c.slice(6,8)), parseInt(c.slice(9,11))||0, parseInt(c.slice(11,13))||0);
+                if (isUTC) return new Date(new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate(),d.getHours(),d.getMinutes())).toLocaleString('en-US',{timeZone:'Europe/Zurich'}));
+                return d;
+            }
+            return new Date(s);
+        }
+
+        function formatDateStr(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+
+        function parseIcal(data) {
+            const evts = [], lines = data.split(/\r?\n/);
+            let cur = null;
+            for (let i=0; i<lines.length; i++) {
                 let line = lines[i].trim();
-                
-                // Handle line folding (continuation lines start with space or tab)
-                while (i + 1 < lines.length && (lines[i + 1].startsWith(' ') || lines[i + 1].startsWith('\t'))) {
-                    i++;
-                    line += lines[i].substring(1);
-                }
-                
-                if (line === 'BEGIN:VEVENT') {
-                    currentEvent = { startIsAllDay: false, endIsAllDay: false };
-                } else if (line === 'END:VEVENT' && currentEvent) {
-                    if (currentEvent.startDate && currentEvent.name) {
-                        let endDate = currentEvent.endDate || currentEvent.startDate;
-                        
-                        // For all-day events, DTEND is exclusive (day after last day)
-                        // So subtract one day to get the actual last day
-                        if (currentEvent.endIsAllDay && endDate !== currentEvent.startDate) {
-                            const endDateObj = new Date(endDate + 'T12:00:00');
-                            endDateObj.setDate(endDateObj.getDate() - 1);
-                            endDate = formatDateStr(endDateObj);
+                while (i+1<lines.length && (lines[i+1].startsWith(' ')||lines[i+1].startsWith('\t'))) { i++; line += lines[i].slice(1); }
+                if (line === 'BEGIN:VEVENT') cur = {};
+                else if (line === 'END:VEVENT' && cur) {
+                    if (cur.startDate && cur.name) {
+                        let end = cur.endDate || cur.startDate;
+                        if (cur.endIsAllDay && end !== cur.startDate) {
+                            const ed = new Date(end+'T12:00:00'); ed.setDate(ed.getDate()-1); end = formatDateStr(ed);
                         }
-                        
-                        const isMultiDay = endDate !== currentEvent.startDate;
-                        
-                        events.push({
-                            id: Date.now() + Math.random(),
-                            date: currentEvent.startDate,
-                            startDate: currentEvent.startDate,
-                            endDate: endDate,
-                            name: currentEvent.name,
-                            isMultiDay: isMultiDay
-                        });
+                        evts.push({ id: Date.now()+Math.random(), date: cur.startDate, startDate: cur.startDate, endDate: end, name: cur.name, isMultiDay: end !== cur.startDate });
                     }
-                    currentEvent = null;
-                } else if (currentEvent) {
-                    const colonIndex = line.indexOf(':');
-                    if (colonIndex > 0) {
-                        const keyPart = line.substring(0, colonIndex);
-                        const value = line.substring(colonIndex + 1);
-                        const isDateOnly = keyPart.includes('VALUE=DATE') && !keyPart.includes('VALUE=DATE-TIME');
-                        
-                        if (keyPart.startsWith('DTSTART')) {
-                            const parsed = parseICalDate(value);
-                            if (parsed) {
-                                currentEvent.startDate = formatDateStr(parsed);
-                                currentEvent.startIsAllDay = isDateOnly || value.length === 8;
-                            }
-                        } else if (keyPart.startsWith('DTEND')) {
-                            const parsed = parseICalDate(value);
-                            if (parsed) {
-                                currentEvent.endDate = formatDateStr(parsed);
-                                currentEvent.endIsAllDay = isDateOnly || value.length === 8;
-                            }
-                        } else if (keyPart === 'SUMMARY') {
-                            currentEvent.name = value;
-                        }
+                    cur = null;
+                } else if (cur) {
+                    const ci = line.indexOf(':');
+                    if (ci > 0) {
+                        const key = line.slice(0,ci), val = line.slice(ci+1);
+                        const isDateOnly = key.includes('VALUE=DATE') && !key.includes('DATE-TIME');
+                        if (key.startsWith('DTSTART')) { const p = parseICalDate(val); if(p) { cur.startDate = formatDateStr(p); cur.startIsAllDay = isDateOnly || val.length===8; } }
+                        else if (key.startsWith('DTEND')) { const p = parseICalDate(val); if(p) { cur.endDate = formatDateStr(p); cur.endIsAllDay = isDateOnly || val.length===8; } }
+                        else if (key === 'SUMMARY') cur.name = val;
                     }
                 }
             }
-            
-            return events;
+            return evts;
         }
 
-        // Fetch calendar from server
         async function fetchCalendar(type) {
-            const statusEl = document.getElementById(`${type}-status`);
-            
+            const status = document.getElementById(`${type}-status`);
             try {
-                const response = await fetch(`/calendars/${type}.ics?t=${Date.now()}`);
-                
-                if (!response.ok) {
-                    throw new Error('Not found');
-                }
-                
-                const data = await response.text();
-                
-                if (!data.includes('BEGIN:VCALENDAR')) {
-                    throw new Error('Invalid data');
-                }
-                
+                const res = await fetch(`/calendars/${type}.ics?t=${Date.now()}`);
+                if (!res.ok) throw new Error();
+                const data = await res.text();
+                if (!data.includes('BEGIN:VCALENDAR')) throw new Error();
                 events[type] = parseIcal(data);
-                statusEl.classList.add('loaded');
-                statusEl.classList.remove('error');
-                
+                status.classList.add('loaded'); status.classList.remove('error');
                 return true;
-            } catch (err) {
-                console.log(`No ${type} calendar available`);
-                statusEl.classList.add('error');
-                statusEl.classList.remove('loaded');
-                events[type] = [];
-                return false;
-            }
+            } catch { status.classList.add('error'); status.classList.remove('loaded'); events[type] = []; return false; }
         }
 
-        // Manual resync
         async function manualResync() {
             const btn = document.getElementById('resync-btn');
             btn.disabled = true;
-            btn.classList.add('syncing');
-            btn.innerHTML = `
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M23 4v6h-6M1 20v-6h6"/>
-                    <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
-                </svg>
-                Syncing...
-            `;
-            
+            btn.innerHTML = '<svg class="spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>';
             try {
-                const response = await fetch('/api/resync', { method: 'POST' });
-                const result = await response.json();
-                
-                if (result.success) {
-                    showToast('Calendars synced successfully!', 'success');
-                    await loadData();
-                } else {
-                    showToast('Sync failed: ' + result.error, 'error');
-                }
-            } catch (err) {
-                showToast('Sync failed: ' + err.message, 'error');
-            }
-            
+                const res = await fetch('/api/resync', { method: 'POST' });
+                const r = await res.json();
+                if (r.success) { showToast('Synced!', 'success'); await loadData(); }
+                else showToast('Sync failed', 'error');
+            } catch (e) { showToast('Sync failed', 'error'); }
             btn.disabled = false;
-            btn.classList.remove('syncing');
-            btn.innerHTML = `
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M23 4v6h-6M1 20v-6h6"/>
-                    <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
-                </svg>
-                Resync
-            `;
+            btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg> Sync';
         }
 
-        // Download timeline as A3 PDF
         async function downloadPDF() {
-            const btn = document.getElementById('download-btn');
-            btn.disabled = true;
-            btn.innerHTML = `
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin">
-                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-                    <polyline points="7,10 12,15 17,10"/>
-                    <line x1="12" y1="15" x2="12" y2="3"/>
-                </svg>
-                Generating...
-            `;
-            
+            showToast('Generating PDF...', 'success');
             try {
-                const section = document.getElementById('timeline-section');
-                
-                // Capture at high resolution
-                const canvas = await html2canvas(section, {
-                    scale: 2,
-                    backgroundColor: '#FAFBFC',
-                    logging: false,
-                    useCORS: true
-                });
-                
-                // A3 dimensions in mm (landscape)
-                const a3Width = 420;
-                const a3Height = 297;
-                
-                // Create PDF in landscape A3
+                const canvas = await html2canvas(document.getElementById('timeline-section'), { scale: 2, backgroundColor: darkMode ? '#0F172A' : '#FAFBFC' });
                 const { jsPDF } = window.jspdf;
-                const pdf = new jsPDF({
-                    orientation: 'landscape',
-                    unit: 'mm',
-                    format: 'a3'
-                });
-                
-                // Calculate scaling to fit A3
-                const imgWidth = canvas.width;
-                const imgHeight = canvas.height;
-                const ratio = Math.min(a3Width / imgWidth, a3Height / imgHeight);
-                
-                const pdfWidth = imgWidth * ratio;
-                const pdfHeight = imgHeight * ratio;
-                
-                // Center on page
-                const x = (a3Width - pdfWidth) / 2;
-                const y = (a3Height - pdfHeight) / 2;
-                
-                // Add image to PDF
-                const imgData = canvas.toDataURL('image/png');
-                pdf.addImage(imgData, 'PNG', x, y, pdfWidth, pdfHeight);
-                
-                // Download
-                pdf.save(`Event-Timeline-${currentYear1}-${currentYear2}.pdf`);
-                
+                const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a3' });
+                const ratio = Math.min(420/canvas.width, 297/canvas.height);
+                pdf.addImage(canvas.toDataURL('image/png'), 'PNG', (420-canvas.width*ratio)/2, (297-canvas.height*ratio)/2, canvas.width*ratio, canvas.height*ratio);
+                pdf.save(`Timeline-${currentYear1}-${currentYear2}.pdf`);
                 showToast('PDF downloaded!', 'success');
-            } catch (err) {
-                console.error('PDF generation failed:', err);
-                showToast('PDF generation failed: ' + err.message, 'error');
-            }
-            
-            btn.disabled = false;
-            btn.innerHTML = `
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-                    <polyline points="7,10 12,15 17,10"/>
-                    <line x1="12" y1="15" x2="12" y2="3"/>
-                </svg>
-                Download A3
-            `;
+            } catch (e) { showToast('PDF failed', 'error'); }
         }
 
-        // Update last sync time
         async function updateStatus() {
             try {
-                const response = await fetch('/api/status');
-                const status = await response.json();
-                
-                const lastSyncEl = document.getElementById('last-sync');
-                if (status.lastFetch) {
-                    const date = new Date(status.lastFetch);
-                    lastSyncEl.textContent = `Last sync: ${date.toLocaleString()}`;
-                } else {
-                    lastSyncEl.textContent = 'Never synced';
-                }
-            } catch (err) {
-                console.error('Failed to get status:', err);
-            }
+                const res = await fetch('/api/status');
+                const s = await res.json();
+                document.getElementById('last-sync').textContent = s.lastFetch ? `Synced: ${new Date(s.lastFetch).toLocaleString()}` : 'Never synced';
+            } catch {}
         }
 
-        // Render events list
         function renderEventsList(type) {
-            const listEl = document.getElementById(`${type}-list`);
-            const countEl = document.getElementById(`${type}-count`);
-            const typeEvents = getAllEvents(type);
-            
-            countEl.textContent = `${typeEvents.length} event${typeEvents.length !== 1 ? 's' : ''}`;
-            
-            if (typeEvents.length === 0) {
-                listEl.innerHTML = '<div class="events-list-empty">No events loaded</div>';
-                return;
-            }
-            
-            typeEvents.sort((a, b) => (a.startDate || a.date).localeCompare(b.startDate || b.date));
-            
-            listEl.innerHTML = typeEvents.map(event => {
-                const startDateStr = event.startDate || event.date;
-                const endDateStr = event.endDate || startDateStr;
-                const startDate = new Date(startDateStr + 'T12:00:00');
-                const startFormatted = startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                
-                let dateDisplay = startFormatted;
-                if (endDateStr !== startDateStr) {
-                    const endDate = new Date(endDateStr + 'T12:00:00');
-                    const endFormatted = endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                    dateDisplay = `${startFormatted} - ${endFormatted}`;
-                }
-                
-                return `
-                    <div class="events-list-item">
-                        <span class="events-list-name">${event.name}</span>
-                        <span class="events-list-date">${dateDisplay}</span>
-                    </div>
-                `;
+            const list = document.getElementById(`${type}-list`), count = document.getElementById(`${type}-count`);
+            let evts = filters[type] ? getAllEvents(type).filter(matchesSearch) : [];
+            count.textContent = `${evts.length} event${evts.length!==1?'s':''}`;
+            if (!evts.length) { list.innerHTML = '<div class="events-list-empty">No events</div>'; return; }
+            evts.sort((a,b) => a.startDate.localeCompare(b.startDate));
+            list.innerHTML = evts.map(e => {
+                const sd = new Date(e.startDate+'T12:00:00');
+                let dateStr = sd.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+                if (e.endDate && e.endDate !== e.startDate) dateStr += ' - ' + new Date(e.endDate+'T12:00:00').toLocaleDateString('en-US', { month:'short', day:'numeric' });
+                return `<div class="events-list-item" onclick='openModal(${JSON.stringify(e).replace(/'/g,"&#39;")}, "${type}")'><span class="events-list-name">${e.name}</span><span class="events-list-date">${dateStr}</span></div>`;
             }).join('');
         }
 
-        // Calculate position on timeline (0-100%)
-        function getPositionForDate(dateStr, year) {
-            const date = new Date(dateStr + 'T12:00:00');
-            if (date.getFullYear() !== year) return null;
-            
-            const startOfYear = new Date(year, 0, 1);
-            const diffTime = date - startOfYear;
-            const dayOfYear = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-            
-            const isLeapYear = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
-            const totalDays = isLeapYear ? 366 : 365;
-            
-            return (dayOfYear / (totalDays - 1)) * 100;
+        function getPositionForDate(s, year) {
+            const d = new Date(s+'T12:00:00');
+            if (d.getFullYear() !== year) return null;
+            const start = new Date(year, 0, 1);
+            const dayOfYear = Math.floor((d - start) / (1000*60*60*24));
+            const totalDays = ((year%4===0 && year%100!==0) || year%400===0) ? 366 : 365;
+            return (dayOfYear / (totalDays-1)) * 100;
         }
 
-        // Render month markers
-        function renderMonthMarkers(containerId, year) {
-            const container = document.getElementById(containerId);
+        function renderMonthMarkers(id, year) {
             let html = '';
-            
-            for (let month = 0; month < 12; month++) {
-                const date = new Date(year, month, 1);
-                const pos = getPositionForDate(`${year}-${String(month + 1).padStart(2, '0')}-01`, year);
-                if (pos !== null) {
-                    html += `
-                        <div class="month-marker" style="left: ${pos}%;">
-                            <div class="month-marker-line"></div>
-                            <span class="month-marker-label">${monthShort[month]}</span>
-                        </div>
-                    `;
-                }
+            for (let m=0; m<12; m++) {
+                const pos = getPositionForDate(`${year}-${String(m+1).padStart(2,'0')}-01`, year);
+                if (pos !== null) html += `<div class="month-marker" style="left:${pos}%"><div class="month-marker-line"></div><span class="month-marker-label">${monthShort[m]}</span></div>`;
             }
-            
-            container.innerHTML = html;
+            document.getElementById(id).innerHTML = html;
         }
 
-        // Render events on timeline
-        function renderTimelineEvents(eventsContainerId, monthsContainerId, emptyId, year) {
-            const container = document.getElementById(eventsContainerId);
+        function renderTodayMarker(year) {
+            const today = new Date();
+            if (today.getFullYear() !== year) return '';
+            const pos = getPositionForDate(formatDateStr(today), year);
+            return pos !== null ? `<div class="today-marker" style="left:${pos}%"></div>` : '';
+        }
+
+        function renderTimelineEvents(eventsId, monthsId, emptyId, year) {
+            const container = document.getElementById(eventsId);
             const emptyEl = document.getElementById(emptyId);
+            renderMonthMarkers(monthsId, year);
             
-            // Render month markers
-            renderMonthMarkers(monthsContainerId, year);
+            const primary = [], secondary = [], multiDay = [];
             
-            const primaryEvents = [];
-            const secondaryEvents = [];
-            const multiDayEvents = [];
-            
-            // Collect iCal events
-            ['blessthun', 'youth'].forEach(type => {
-                (events[type] || []).forEach(event => {
-                    const startDateStr = event.startDate || event.date;
-                    if (!startDateStr) return;
+            ['blessthun','youth'].forEach(type => {
+                if (!filters[type]) return;
+                (events[type]||[]).forEach(e => {
+                    if (!matchesSearch(e)) return;
+                    const sd = e.startDate || e.date;
+                    if (!sd || parseInt(sd.slice(0,4)) < MIN_YEAR) return;
                     
-                    const eventYear = parseInt(startDateStr.substring(0, 4));
-                    if (eventYear < MIN_YEAR) return;
-                    
-                    // Handle multi-day events
-                    if (event.isMultiDay && event.endDate) {
-                        const startPos = getPositionForDate(startDateStr, year);
-                        const endPos = getPositionForDate(event.endDate, year);
-                        
-                        // Check if event overlaps with this year
-                        if (startPos !== null || endPos !== null) {
-                            const startDate = new Date(startDateStr + 'T12:00:00');
-                            const endDate = new Date(event.endDate + 'T12:00:00');
-                            
-                            // Clamp positions to year boundaries
-                            const clampedStartPos = startPos !== null ? startPos : 0;
-                            const clampedEndPos = endPos !== null ? endPos : 100;
-                            
-                            // Format date display
-                            let dateDisplay = monthShort[startDate.getMonth()] + ' ' + startDate.getDate();
-                            dateDisplay += ' - ' + monthShort[endDate.getMonth()] + ' ' + endDate.getDate();
-                            
-                            multiDayEvents.push({
-                                ...event,
-                                type,
-                                startPosition: clampedStartPos,
-                                endPosition: clampedEndPos,
-                                dateDisplay
-                            });
+                    if (e.isMultiDay && e.endDate) {
+                        const sp = getPositionForDate(sd, year), ep = getPositionForDate(e.endDate, year);
+                        if (sp !== null || ep !== null) {
+                            const startD = new Date(sd+'T12:00:00'), endD = new Date(e.endDate+'T12:00:00');
+                            multiDay.push({ ...e, type, startPosition: sp??0, endPosition: ep??100, dateDisplay: `${monthShort[startD.getMonth()]} ${startD.getDate()} - ${monthShort[endD.getMonth()]} ${endD.getDate()}` });
                         }
                     } else {
-                        // Single-day event
-                        const pos = getPositionForDate(startDateStr, year);
+                        const pos = getPositionForDate(sd, year);
                         if (pos !== null) {
-                            const date = new Date(startDateStr + 'T12:00:00');
-                            const eventData = {
-                                ...event,
-                                type,
-                                position: pos,
-                                month: monthNames[date.getMonth()],
-                                day: date.getDate()
-                            };
-                            
-                            // Check if primary event
-                            if (event.name === PRIMARY_EVENTS[type]) {
-                                primaryEvents.push(eventData);
-                            } else {
-                                secondaryEvents.push(eventData);
-                            }
+                            const d = new Date(sd+'T12:00:00');
+                            const data = { ...e, type, position: pos, month: monthNames[d.getMonth()], day: d.getDate() };
+                            (e.name === PRIMARY_EVENTS[type] ? primary : secondary).push(data);
                         }
                     }
                 });
             });
 
-            const hasEvents = primaryEvents.length > 0 || secondaryEvents.length > 0 || multiDayEvents.length > 0;
-            emptyEl.style.display = hasEvents ? 'none' : 'block';
+            emptyEl.style.display = (primary.length || secondary.length || multiDay.length) ? 'none' : 'block';
 
-            // Assign offsets to multi-day events to avoid overlap
-            const blessthunMulti = multiDayEvents.filter(e => e.type === 'blessthun');
-            const youthMulti = multiDayEvents.filter(e => e.type === 'youth');
-
-            function assignOffsets(evts) {
-                evts.sort((a, b) => a.startPosition - b.startPosition);
-                evts.forEach((event, i) => {
-                    event.offset = 0;
-                    const eventCenter = (event.startPosition + event.endPosition) / 2;
-                    for (let j = 0; j < i; j++) {
-                        const otherCenter = (evts[j].startPosition + evts[j].endPosition) / 2;
-                        const overlap = Math.abs(otherCenter - eventCenter) < 12;
-                        if (overlap) {
-                            event.offset = Math.min((evts[j].offset || 0) + 1, 2);
-                        }
+            const assignOffsets = evts => {
+                evts.sort((a,b) => a.startPosition - b.startPosition);
+                evts.forEach((e,i) => {
+                    e.offset = 0;
+                    const center = (e.startPosition + e.endPosition) / 2;
+                    for (let j=0; j<i; j++) {
+                        if (Math.abs((evts[j].startPosition + evts[j].endPosition)/2 - center) < 12) e.offset = Math.min((evts[j].offset||0)+1, 2);
                     }
                 });
-            }
+            };
+            assignOffsets(multiDay.filter(e => e.type==='blessthun'));
+            assignOffsets(multiDay.filter(e => e.type==='youth'));
 
-            assignOffsets(blessthunMulti);
-            assignOffsets(youthMulti);
-
-            let html = '';
+            let html = renderTodayMarker(year);
             
-            // Render multi-day pills and labels
-            multiDayEvents.forEach(event => {
-                const width = Math.max(event.endPosition - event.startPosition, 3);
-                const centerPosition = event.startPosition + (width / 2);
-                
-                html += `
-                    <div class="multiday-pill ${event.type}" style="left: ${event.startPosition}%; width: ${width}%;"></div>
-                `;
-                
-                const offsetClass = event.offset > 0 ? ` offset-${event.offset}` : '';
-                const typeClass = `${event.type}-type`;
-                
-                html += `
-                    <div class="multiday-label ${typeClass}${offsetClass}" style="left: ${centerPosition}%;">
-                        <div class="event-label">
-                            <span class="event-month">${event.dateDisplay}</span>
-                            <span class="event-name">${event.name || 'Event'}</span>
-                        </div>
-                        <div class="event-connector"></div>
-                    </div>
-                `;
+            multiDay.forEach(e => {
+                const width = Math.max(e.endPosition - e.startPosition, 3);
+                const center = e.startPosition + width/2;
+                html += `<div class="multiday-pill ${e.type}" style="left:${e.startPosition}%;width:${width}%"></div>`;
+                html += `<div class="multiday-label ${e.type}-type${e.offset?` offset-${e.offset}`:''}" style="left:${center}%" onclick='openModal(${JSON.stringify(e).replace(/'/g,"&#39;")}, "${e.type}")'><div class="event-label"><span class="event-month">${e.dateDisplay}</span><span class="event-name">${e.name||'Event'}</span></div><div class="event-connector"></div></div>`;
             });
             
-            // Render secondary events as small squares
-            secondaryEvents.forEach(event => {
-                html += `
-                    <div class="secondary-event ${event.type}" style="left: ${event.position}%;">
-                        <div class="event-tooltip">${event.month} ${event.day}: ${event.name || 'Event'}</div>
-                        <div class="event-square ${event.type}"></div>
-                    </div>
-                `;
+            secondary.forEach(e => {
+                html += `<div class="secondary-event ${e.type}" style="left:${e.position}%" onclick='openModal(${JSON.stringify(e).replace(/'/g,"&#39;")}, "${e.type}")'><div class="event-tooltip">${e.month} ${e.day}: ${e.name||'Event'}</div><div class="event-square ${e.type}"></div></div>`;
             });
             
-            // Render primary iCal events as dots
-            primaryEvents.forEach(event => {
-                html += `
-                    <div class="event-marker ${event.type}" style="left: ${event.position}%;">
-                        <div class="event-tooltip">${event.month} ${event.day}: ${event.name || 'Event'}</div>
-                        <div class="event-dot ${event.type}"></div>
-                    </div>
-                `;
+            primary.forEach(e => {
+                html += `<div class="event-marker ${e.type}" style="left:${e.position}%" onclick='openModal(${JSON.stringify(e).replace(/'/g,"&#39;")}, "${e.type}")'><div class="event-tooltip">${e.month} ${e.day}: ${e.name||'Event'}</div><div class="event-dot ${e.type}"></div></div>`;
             });
 
             container.innerHTML = html;
@@ -1422,42 +1460,51 @@
             renderTimelineEvents('timeline2-events', 'timeline2-months', 'timeline2-empty', currentYear2);
         }
 
-        // Get all events filtered by year
         function getAllEvents(type) {
-            const icalEvents = events[type] || [];
-            
-            // Filter to only show events from MIN_YEAR onwards
-            return icalEvents.filter(e => {
-                const dateStr = e.startDate || e.date;
-                if (!dateStr) return false;
-                const year = parseInt(dateStr.substring(0, 4));
-                return year >= MIN_YEAR;
-            });
+            return (events[type]||[]).map(e => ({...e, type})).filter(e => e.startDate && parseInt(e.startDate.slice(0,4)) >= MIN_YEAR);
+        }
+
+        function openModal(e, type) {
+            currentModalEvent = { ...e, type };
+            document.getElementById('modal-title').textContent = e.name;
+            const badge = document.getElementById('modal-badge');
+            badge.textContent = type === 'blessthun' ? 'BlessThun' : 'Youth Revival';
+            badge.className = `modal-badge ${type}`;
+            const sd = new Date((e.startDate||e.date)+'T12:00:00');
+            let dateText = sd.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+            if (e.endDate && e.endDate !== e.startDate) dateText += ' - ' + new Date(e.endDate+'T12:00:00').toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+            document.getElementById('modal-date-text').textContent = dateText;
+            document.getElementById('event-modal').classList.add('active');
+        }
+
+        function closeModal(ev) {
+            if (ev && ev.target !== ev.currentTarget) return;
+            document.getElementById('event-modal').classList.remove('active');
+            currentModalEvent = null;
+        }
+
+        function addToCalendar() {
+            if (!currentModalEvent) return;
+            const e = currentModalEvent;
+            const sd = (e.startDate||e.date).replace(/-/g,'');
+            const ed = new Date(e.endDate||e.startDate); ed.setDate(ed.getDate()+1);
+            const edStr = ed.toISOString().slice(0,10).replace(/-/g,'');
+            const ics = `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nUID:${Date.now()}@timeline\nDTSTART;VALUE=DATE:${sd}\nDTEND;VALUE=DATE:${edStr}\nSUMMARY:${e.name}\nEND:VEVENT\nEND:VCALENDAR`;
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
+            a.download = `${e.name.replace(/[^a-zA-Z0-9]/g,'_')}.ics`;
+            a.click();
+            showToast('Event downloaded!', 'success');
+            closeModal();
         }
 
         async function loadData() {
-            await Promise.all([
-                fetchCalendar('blessthun'),
-                fetchCalendar('youth')
-            ]);
-            
+            await Promise.all([fetchCalendar('blessthun'), fetchCalendar('youth')]);
             renderEventsList('blessthun');
             renderEventsList('youth');
             renderAllTimelines();
-            updateStatus();
+            updateCountdown();
         }
-
-        async function init() {
-            document.getElementById('year1-badge').textContent = currentYear1;
-            document.getElementById('year2-badge').textContent = currentYear2;
-            
-            await loadData();
-        }
-
-        init();
-        
-        // Refresh display every 5 minutes
-        setInterval(loadData, 5 * 60 * 1000);
     </script>
 </body>
 </html>
