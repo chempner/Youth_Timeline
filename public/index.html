@@ -62,6 +62,30 @@
             padding: 1rem 0;
         }
 
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .nav-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+            background: var(--border);
+        }
+
         h1 {
             font-family: 'Playfair Display', serif;
             font-size: 2.5rem;
@@ -964,10 +988,255 @@
         }
 
         .notification-prompt.hidden { display: none; }
+
+        /* PDF Dropdown */
+        .pdf-dropdown {
+            position: relative;
+        }
+
+        .pdf-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 4px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: none;
+            z-index: 100;
+            overflow: hidden;
+        }
+
+        .pdf-menu.show {
+            display: block;
+        }
+
+        .pdf-menu button {
+            display: block;
+            width: 100%;
+            padding: 0.6rem 1rem;
+            border: none;
+            background: none;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            text-align: left;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .pdf-menu button:hover {
+            background: var(--border);
+        }
+
+        /* Progress Bar */
+        .progress-section {
+            margin: 1rem 0;
+        }
+
+        .progress-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .progress-info {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .progress-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.3rem;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--salmon), var(--mint));
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-text {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.2rem;
+        }
+
+        .jump-today-btn {
+            background: var(--today);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            transition: all 0.2s;
+        }
+
+        .jump-today-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(59,130,246,0.3);
+        }
+
+        /* Stats Card */
+        .stats-section {
+            margin: 1.5rem 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .stat-value.blessthun { color: var(--salmon); }
+        .stat-value.youth { color: var(--mint); }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.2rem;
+        }
+
+        /* Share Modal */
+        .share-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 4px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            display: none;
+            z-index: 100;
+            padding: 1rem;
+            min-width: 200px;
+        }
+
+        .share-menu.show {
+            display: block;
+        }
+
+        .share-menu h4 {
+            font-size: 0.85rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .share-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .share-btn {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .share-btn:hover {
+            background: var(--border);
+        }
+
+        .qr-container {
+            text-align: center;
+            padding-top: 0.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .qr-container canvas {
+            border-radius: 8px;
+        }
+
+        .qr-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-top: 0.3rem;
+        }
+
+        /* Past Events Faded */
+        .event-marker.past,
+        .secondary-event.past,
+        .multiday-label.past {
+            opacity: 0.4;
+        }
+
+        .event-marker.past:hover,
+        .secondary-event.past:hover,
+        .multiday-label.past:hover {
+            opacity: 0.8;
+        }
+
+        .multiday-pill.past {
+            opacity: 0.4;
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <div class="nav-links">
+            <a href="/" class="nav-link active">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/>
+                </svg>
+                Timeline
+            </a>
+            <a href="/overview" class="nav-link">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                Yearly Overview
+            </a>
+        </div>
+
         <header>
             <h1>Event Timeline</h1>
             <p class="subtitle">Two-Year Overview</p>
@@ -1019,24 +1288,106 @@
                 Sync
             </button>
 
-            <button class="btn btn-success" onclick="downloadPDF()">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/>
-                </svg>
-                PDF
-            </button>
+            <div class="pdf-dropdown">
+                <button class="btn btn-success" onclick="togglePdfMenu()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    PDF
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6,9 12,15 18,9"/>
+                    </svg>
+                </button>
+                <div class="pdf-menu" id="pdf-menu">
+                    <button onclick="downloadPDF('a4')">A4 Landscape</button>
+                    <button onclick="downloadPDF('a3')">A3 Landscape</button>
+                </div>
+            </div>
 
             <button class="btn-icon" onclick="toggleDarkMode()" title="Toggle dark mode">
                 <svg id="theme-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
                 </svg>
             </button>
+
+            <div class="pdf-dropdown">
+                <button class="btn-icon" onclick="toggleShareMenu()" title="Share">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                    </svg>
+                </button>
+                <div class="share-menu" id="share-menu">
+                    <h4>Share</h4>
+                    <div class="share-buttons">
+                        <button class="share-btn" onclick="copyLink()" title="Copy link">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                            </svg>
+                        </button>
+                        <button class="share-btn" onclick="shareWhatsApp()" title="WhatsApp">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                            </svg>
+                        </button>
+                        <button class="share-btn" onclick="shareTelegram()" title="Telegram">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="qr-container">
+                        <canvas id="qr-canvas" width="120" height="120"></canvas>
+                        <div class="qr-label">Scan to open</div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="status-bar">
             <span><span class="status-dot" id="blessthun-status"></span>BlessThun</span>
             <span><span class="status-dot" id="youth-status"></span>Youth Revival</span>
             <span id="last-sync"></span>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-section">
+            <div class="progress-card">
+                <div class="progress-info">
+                    <div class="progress-label" id="progress-label">Year Progress</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                    </div>
+                    <div class="progress-text" id="progress-text">0% of 2026</div>
+                </div>
+                <button class="jump-today-btn" onclick="jumpToToday()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/>
+                    </svg>
+                    Jump to Today
+                </button>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value blessthun" id="stat-blessthun">0</div>
+                    <div class="stat-label">BlessThun Events</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value youth" id="stat-youth">0</div>
+                    <div class="stat-label">Youth Revival Events</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-upcoming">0</div>
+                    <div class="stat-label">Upcoming</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-busiest">-</div>
+                    <div class="stat-label">Busiest Month</div>
+                </div>
+            </div>
         </div>
 
         <div class="timeline-section" id="timeline-section">
@@ -1333,17 +1684,64 @@
             btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg> Sync';
         }
 
-        async function downloadPDF() {
+        function togglePdfMenu() {
+            document.getElementById('pdf-menu').classList.toggle('show');
+        }
+
+        async function downloadPDF(format = 'a3') {
+            document.getElementById('pdf-menu').classList.remove('show');
             showToast('Generating PDF...', 'success');
+            
+            // Page dimensions in mm (landscape)
+            const sizes = {
+                a4: { width: 297, height: 210 },
+                a3: { width: 420, height: 297 }
+            };
+            const page = sizes[format];
+            const pageAspect = page.width / page.height;
+            
             try {
-                const canvas = await html2canvas(document.getElementById('timeline-section'), { scale: 2, backgroundColor: darkMode ? '#0F172A' : '#FAFBFC' });
+                // Capture at high resolution
+                const section = document.getElementById('timeline-section');
+                const canvas = await html2canvas(section, { 
+                    scale: 2, 
+                    backgroundColor: darkMode ? '#0F172A' : '#FAFBFC',
+                    logging: false
+                });
+                
+                const imgAspect = canvas.width / canvas.height;
+                
                 const { jsPDF } = window.jspdf;
-                const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a3' });
-                const ratio = Math.min(420/canvas.width, 297/canvas.height);
-                pdf.addImage(canvas.toDataURL('image/png'), 'PNG', (420-canvas.width*ratio)/2, (297-canvas.height*ratio)/2, canvas.width*ratio, canvas.height*ratio);
-                pdf.save(`Timeline-${currentYear1}-${currentYear2}.pdf`);
+                const pdf = new jsPDF({ 
+                    orientation: 'landscape', 
+                    unit: 'mm', 
+                    format: format 
+                });
+                
+                let imgWidth, imgHeight, x, y;
+                
+                // Fit image to page while maintaining aspect ratio
+                if (imgAspect > pageAspect) {
+                    // Image is wider - fit to width
+                    imgWidth = page.width - 20; // 10mm margin each side
+                    imgHeight = imgWidth / imgAspect;
+                    x = 10;
+                    y = (page.height - imgHeight) / 2;
+                } else {
+                    // Image is taller - fit to height
+                    imgHeight = page.height - 20; // 10mm margin each side
+                    imgWidth = imgHeight * imgAspect;
+                    x = (page.width - imgWidth) / 2;
+                    y = 10;
+                }
+                
+                pdf.addImage(canvas.toDataURL('image/png'), 'PNG', x, y, imgWidth, imgHeight);
+                pdf.save(`Timeline-${currentYear1}-${currentYear2}-${format.toUpperCase()}.pdf`);
                 showToast('PDF downloaded!', 'success');
-            } catch (e) { showToast('PDF failed', 'error'); }
+            } catch (e) { 
+                console.error(e);
+                showToast('PDF failed', 'error'); 
+            }
         }
 
         async function updateStatus() {
@@ -1440,20 +1838,27 @@
             assignOffsets(multiDay.filter(e => e.type==='youth'));
 
             let html = renderTodayMarker(year);
+            const todayStr = formatDateStr(new Date());
             
             multiDay.forEach(e => {
                 const width = Math.max(e.endPosition - e.startPosition, 3);
                 const center = e.startPosition + width/2;
-                html += `<div class="multiday-pill ${e.type}" style="left:${e.startPosition}%;width:${width}%"></div>`;
-                html += `<div class="multiday-label ${e.type}-type${e.offset?` offset-${e.offset}`:''}" style="left:${center}%" onclick='openModal(${JSON.stringify(e).replace(/'/g,"&#39;")}, "${e.type}")'><div class="event-label"><span class="event-month">${e.dateDisplay}</span><span class="event-name">${e.name||'Event'}</span></div><div class="event-connector"></div></div>`;
+                const isPast = (e.endDate || e.startDate) < todayStr;
+                const pastClass = isPast ? ' past' : '';
+                html += `<div class="multiday-pill ${e.type}${pastClass}" style="left:${e.startPosition}%;width:${width}%"></div>`;
+                html += `<div class="multiday-label ${e.type}-type${e.offset?` offset-${e.offset}`:''}${pastClass}" style="left:${center}%" onclick='openModal(${JSON.stringify(e).replace(/'/g,"&#39;")}, "${e.type}")'><div class="event-label"><span class="event-month">${e.dateDisplay}</span><span class="event-name">${e.name||'Event'}</span></div><div class="event-connector"></div></div>`;
             });
             
             secondary.forEach(e => {
-                html += `<div class="secondary-event ${e.type}" style="left:${e.position}%" onclick='openModal(${JSON.stringify(e).replace(/'/g,"&#39;")}, "${e.type}")'><div class="event-tooltip">${e.month} ${e.day}: ${e.name||'Event'}</div><div class="event-square ${e.type}"></div></div>`;
+                const isPast = (e.startDate || e.date) < todayStr;
+                const pastClass = isPast ? ' past' : '';
+                html += `<div class="secondary-event ${e.type}${pastClass}" style="left:${e.position}%" onclick='openModal(${JSON.stringify(e).replace(/'/g,"&#39;")}, "${e.type}")'><div class="event-tooltip">${e.month} ${e.day}: ${e.name||'Event'}</div><div class="event-square ${e.type}"></div></div>`;
             });
             
             primary.forEach(e => {
-                html += `<div class="event-marker ${e.type}" style="left:${e.position}%" onclick='openModal(${JSON.stringify(e).replace(/'/g,"&#39;")}, "${e.type}")'><div class="event-tooltip">${e.month} ${e.day}: ${e.name||'Event'}</div><div class="event-dot ${e.type}"></div></div>`;
+                const isPast = (e.startDate || e.date) < todayStr;
+                const pastClass = isPast ? ' past' : '';
+                html += `<div class="event-marker ${e.type}${pastClass}" style="left:${e.position}%" onclick='openModal(${JSON.stringify(e).replace(/'/g,"&#39;")}, "${e.type}")'><div class="event-tooltip">${e.month} ${e.day}: ${e.name||'Event'}</div><div class="event-dot ${e.type}"></div></div>`;
             });
 
             container.innerHTML = html;
@@ -1502,12 +1907,140 @@
             closeModal();
         }
 
+        // Progress bar
+        function updateProgress() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const start = new Date(year, 0, 1);
+            const end = new Date(year + 1, 0, 1);
+            const progress = ((now - start) / (end - start)) * 100;
+            
+            document.getElementById('progress-fill').style.width = `${progress.toFixed(1)}%`;
+            document.getElementById('progress-text').textContent = `${progress.toFixed(0)}% of ${year}`;
+            document.getElementById('progress-label').textContent = `${year} Progress`;
+        }
+
+        // Statistics
+        function updateStats() {
+            const blessthunEvents = getAllEvents('blessthun');
+            const youthEvents = getAllEvents('youth');
+            const allEvents = [...blessthunEvents, ...youthEvents];
+            const now = new Date();
+            const todayStr = formatDateStr(now);
+            
+            // Count upcoming
+            const upcoming = allEvents.filter(e => e.startDate >= todayStr).length;
+            
+            // Find busiest month
+            const monthCounts = {};
+            allEvents.forEach(e => {
+                const month = e.startDate.slice(0, 7);
+                monthCounts[month] = (monthCounts[month] || 0) + 1;
+            });
+            
+            let busiestMonth = '-';
+            let maxCount = 0;
+            Object.entries(monthCounts).forEach(([month, count]) => {
+                if (count > maxCount) {
+                    maxCount = count;
+                    const [y, m] = month.split('-');
+                    busiestMonth = monthShort[parseInt(m) - 1];
+                }
+            });
+            
+            document.getElementById('stat-blessthun').textContent = blessthunEvents.length;
+            document.getElementById('stat-youth').textContent = youthEvents.length;
+            document.getElementById('stat-upcoming').textContent = upcoming;
+            document.getElementById('stat-busiest').textContent = busiestMonth;
+        }
+
+        // Jump to today
+        function jumpToToday() {
+            const now = new Date();
+            const year = now.getFullYear();
+            
+            // Update year selects to current year
+            if (currentYear1 !== year) {
+                currentYear1 = year;
+                document.getElementById('year1-select').value = year;
+                document.getElementById('year1-badge').textContent = year;
+            }
+            
+            renderAllTimelines();
+            
+            // Scroll to today marker
+            setTimeout(() => {
+                const todayMarker = document.querySelector('.today-marker');
+                if (todayMarker) {
+                    todayMarker.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+                    showToast('Jumped to today!', 'success');
+                }
+            }, 100);
+        }
+
+        // Share functions
+        function toggleShareMenu() {
+            const menu = document.getElementById('share-menu');
+            menu.classList.toggle('show');
+            if (menu.classList.contains('show')) {
+                generateQR();
+            }
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.pdf-dropdown')) {
+                document.getElementById('pdf-menu')?.classList.remove('show');
+                document.getElementById('share-menu')?.classList.remove('show');
+            }
+        });
+
+        function copyLink() {
+            navigator.clipboard.writeText(window.location.href);
+            showToast('Link copied!', 'success');
+            document.getElementById('share-menu').classList.remove('show');
+        }
+
+        function shareWhatsApp() {
+            const url = encodeURIComponent(window.location.href);
+            window.open(`https://wa.me/?text=Check%20out%20this%20event%20timeline:%20${url}`, '_blank');
+        }
+
+        function shareTelegram() {
+            const url = encodeURIComponent(window.location.href);
+            window.open(`https://t.me/share/url?url=${url}&text=Event%20Timeline`, '_blank');
+        }
+
+        // Simple QR code generator
+        function generateQR() {
+            const canvas = document.getElementById('qr-canvas');
+            const ctx = canvas.getContext('2d');
+            const url = window.location.href;
+            
+            // Use a simple QR API
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = () => {
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, 120, 120);
+                ctx.drawImage(img, 0, 0, 120, 120);
+            };
+            img.src = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(url)}`;
+        }
+
+        // Check if date is in the past
+        function isPastDate(dateStr) {
+            const today = formatDateStr(new Date());
+            return dateStr < today;
+        }
+
         async function loadData() {
             await Promise.all([fetchCalendar('blessthun'), fetchCalendar('youth')]);
             renderEventsList('blessthun');
             renderEventsList('youth');
             renderAllTimelines();
             updateCountdown();
+            updateProgress();
+            updateStats();
         }
     </script>
 </body>
