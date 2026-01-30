@@ -31,8 +31,8 @@
             --text-secondary: #94A3B8;
             --border: #334155;
             --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
-            --salmon-light: rgba(250, 128, 114, 0.15);
-            --mint-light: rgba(62, 180, 137, 0.15);
+            --salmon-light: rgba(250, 128, 114, 0.25);
+            --mint-light: rgba(62, 180, 137, 0.25);
         }
 
         * {
@@ -207,7 +207,7 @@
         }
 
         .btn {
-            background: var(--text-primary);
+            background: #1E293B;
             color: white;
             border: none;
             padding: 0.5rem 0.9rem;
@@ -536,7 +536,7 @@
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
-            background: var(--text-primary);
+            background: #1E293B;
             color: white;
             padding: 0.4rem 0.6rem;
             border-radius: 6px;
@@ -598,7 +598,7 @@
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
-            background: var(--text-primary);
+            background: #1E293B;
             color: white;
             padding: 0.4rem 0.6rem;
             border-radius: 6px;
@@ -704,10 +704,14 @@
         .multiday-label .event-name {
             font-size: 0.65rem;
             font-weight: 500;
-            color: var(--text-primary);
+            color: #1A1A2E;
             text-align: center;
             word-wrap: break-word;
             max-width: 95px;
+        }
+
+        [data-theme="dark"] .multiday-label .event-name {
+            color: #F1F5F9;
         }
 
         .multiday-label:hover .event-label {
@@ -910,7 +914,7 @@
             position: fixed;
             bottom: 1.5rem;
             right: 1.5rem;
-            background: var(--text-primary);
+            background: #1E293B;
             color: white;
             padding: 0.75rem 1.25rem;
             border-radius: 10px;
