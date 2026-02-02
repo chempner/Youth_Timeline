@@ -1569,6 +1569,9 @@
             if (t===1) { currentYear1=y; document.getElementById('year1-badge').textContent=y; }
             else { currentYear2=y; document.getElementById('year2-badge').textContent=y; }
             renderAllTimelines();
+            renderEventsList('blessthun');
+            renderEventsList('youth');
+            updateStats();
         }
 
         function toggleFilter(type) {
@@ -1754,7 +1757,7 @@
 
         function renderEventsList(type) {
             const list = document.getElementById(`${type}-list`), count = document.getElementById(`${type}-count`);
-            let evts = filters[type] ? getAllEvents(type).filter(matchesSearch) : [];
+            let evts = filters[type] ? getVisibleEvents(type).filter(matchesSearch) : [];
             count.textContent = `${evts.length} event${evts.length!==1?'s':''}`;
             if (!evts.length) { list.innerHTML = '<div class="events-list-empty">No events</div>'; return; }
             evts.sort((a,b) => a.startDate.localeCompare(b.startDate));
@@ -1873,6 +1876,19 @@
             return (events[type]||[]).map(e => ({...e, type})).filter(e => e.startDate && parseInt(e.startDate.slice(0,4)) >= MIN_YEAR);
         }
 
+        // Get only events visible on the current timelines
+        function getVisibleEvents(type) {
+            return getAllEvents(type).filter(e => {
+                const startYear = parseInt(e.startDate.slice(0, 4));
+                const endYear = e.endDate ? parseInt(e.endDate.slice(0, 4)) : startYear;
+                // Event is visible if it overlaps with either displayed year
+                return (startYear === currentYear1 || startYear === currentYear2 ||
+                        endYear === currentYear1 || endYear === currentYear2 ||
+                        (startYear < currentYear1 && endYear > currentYear1) ||
+                        (startYear < currentYear2 && endYear > currentYear2));
+            });
+        }
+
         function openModal(e, type) {
             currentModalEvent = { ...e, type };
             document.getElementById('modal-title').textContent = e.name;
@@ -1922,16 +1938,16 @@
 
         // Statistics
         function updateStats() {
-            const blessthunEvents = getAllEvents('blessthun');
-            const youthEvents = getAllEvents('youth');
+            const blessthunEvents = getVisibleEvents('blessthun');
+            const youthEvents = getVisibleEvents('youth');
             const allEvents = [...blessthunEvents, ...youthEvents];
             const now = new Date();
             const todayStr = formatDateStr(now);
             
-            // Count upcoming
-            const upcoming = allEvents.filter(e => e.startDate >= todayStr).length;
+            // Count upcoming (use endDate for multi-day, so ongoing events count)
+            const upcoming = allEvents.filter(e => (e.endDate || e.startDate) >= todayStr).length;
             
-            // Find busiest month
+            // Find busiest month (count each event once, by startDate month)
             const monthCounts = {};
             allEvents.forEach(e => {
                 const month = e.startDate.slice(0, 7);
