@@ -17,17 +17,27 @@ if (!fs.existsSync(CALENDARS_DIR)) fs.mkdirSync(CALENDARS_DIR, { recursive: true
 
 // Load or create config
 function loadConfig() {
+    let fileConfig = {};
     try {
         if (fs.existsSync(CONFIG_FILE)) {
-            return JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
+            fileConfig = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
         }
     } catch (e) {
         console.error('Error loading config:', e);
     }
+    
+    // Environment variables ALWAYS take priority over saved config
+    const blessthunUrl = process.env.BLESSTHUN_ICAL_URL || fileConfig.blessthunUrl || '';
+    const youthUrl = process.env.YOUTH_ICAL_URL || fileConfig.youthUrl || '';
+    
+    console.log(`Config loaded:`);
+    console.log(`  BlessThun URL: ${blessthunUrl ? blessthunUrl.substring(0, 50) + '...' : 'NOT SET'}`);
+    console.log(`  Youth URL: ${youthUrl ? youthUrl.substring(0, 50) + '...' : 'NOT SET'}`);
+    
     return {
-        blessthunUrl: process.env.BLESSTHUN_ICAL_URL || '',
-        youthUrl: process.env.YOUTH_ICAL_URL || '',
-        lastFetch: null
+        blessthunUrl,
+        youthUrl,
+        lastFetch: fileConfig.lastFetch || null
     };
 }
 
@@ -159,8 +169,13 @@ async function fetchAllCalendars() {
 app.use(express.json());
 app.use(express.static('public'));
 
-// Serve calendar files
-app.use('/calendars', express.static(CALENDARS_DIR));
+// Serve calendar files (no cache so browser always gets fresh data)
+app.use('/calendars', express.static(CALENDARS_DIR, {
+    setHeaders: (res) => {
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+        res.set('Pragma', 'no-cache');
+    }
+}));
 
 // Overview page route
 app.get('/overview', (req, res) => {
@@ -180,8 +195,13 @@ app.get('/api/status', (req, res) => {
 
 // API: Trigger resync
 app.post('/api/resync', async (req, res) => {
-    const results = await fetchAllCalendars();
-    res.json({ success: true, results });
+    try {
+        const results = await fetchAllCalendars();
+        res.json({ success: true, results, lastFetch: config.lastFetch });
+    } catch (err) {
+        console.error('Resync error:', err);
+        res.json({ success: false, error: err.message });
+    }
 });
 
 // Start server
@@ -191,6 +211,6 @@ app.listen(PORT, () => {
     // Initial fetch
     fetchAllCalendars();
     
-    // Fetch every 60 minutes
-    setInterval(fetchAllCalendars, 60 * 60 * 1000);
+    // Fetch every 30 minutes
+    setInterval(fetchAllCalendars, 30 * 60 * 1000);
 });
