@@ -431,12 +431,12 @@
             padding: 0 6px;
             overflow: visible;
             top: 2px;
-            transform: translateY(-50%);
+            transform: translateY(-9px);
         }
 
-        .holiday-strip.row-1 { transform: translateY(calc(-50% - 22px)); }
-        .holiday-strip.row-2 { transform: translateY(calc(-50% - 44px)); }
-        .holiday-strip.row-3 { transform: translateY(calc(-50% - 66px)); }
+        .holiday-strip.row-1 { transform: translateY(-31px); }
+        .holiday-strip.row-2 { transform: translateY(-53px); }
+        .holiday-strip.row-3 { transform: translateY(-75px); }
 
         .holiday-strip-label {
             color: white;
@@ -725,8 +725,6 @@
             cursor: pointer;
             z-index: 8;
             transition: transform 0.2s ease;
-            width: 12px;
-            height: 12px;
         }
 
         .secondary-event:hover {
@@ -735,36 +733,36 @@
 
         .secondary-event.blessthun {
             top: 2px;
-            transform: translate(-50%, calc(-50% + var(--blessthun-offset)));
+            transform: translate(-50%, calc(var(--blessthun-offset) - 6px));
         }
 
         .secondary-event.blessthun:hover {
-            transform: translate(-50%, calc(-50% + var(--blessthun-offset))) scale(1.3);
+            transform: translate(-50%, calc(var(--blessthun-offset) - 6px)) scale(1.3);
         }
 
         .secondary-event.youth {
             top: 2px;
-            transform: translate(-50%, calc(-50% + var(--youth-offset)));
+            transform: translate(-50%, calc(var(--youth-offset) - 6px));
         }
 
         .secondary-event.youth:hover {
-            transform: translate(-50%, calc(-50% + var(--youth-offset))) scale(1.3);
+            transform: translate(-50%, calc(var(--youth-offset) - 6px)) scale(1.3);
         }
 
         /* Vertical offsets for multiple different secondary events on same day */
-        .secondary-event.blessthun.v-offset-1 { transform: translate(-50%, calc(-50% + var(--blessthun-offset) - 12px)); }
-        .secondary-event.blessthun.v-offset-2 { transform: translate(-50%, calc(-50% + var(--blessthun-offset) - 24px)); }
-        .secondary-event.blessthun.v-offset-3 { transform: translate(-50%, calc(-50% + var(--blessthun-offset) - 36px)); }
-        .secondary-event.youth.v-offset-1 { transform: translate(-50%, calc(-50% + var(--youth-offset) + 12px)); }
-        .secondary-event.youth.v-offset-2 { transform: translate(-50%, calc(-50% + var(--youth-offset) + 24px)); }
-        .secondary-event.youth.v-offset-3 { transform: translate(-50%, calc(-50% + var(--youth-offset) + 36px)); }
+        .secondary-event.blessthun.v-offset-1 { transform: translate(-50%, calc(var(--blessthun-offset) - 6px - 12px)); }
+        .secondary-event.blessthun.v-offset-2 { transform: translate(-50%, calc(var(--blessthun-offset) - 6px - 24px)); }
+        .secondary-event.blessthun.v-offset-3 { transform: translate(-50%, calc(var(--blessthun-offset) - 6px - 36px)); }
+        .secondary-event.youth.v-offset-1 { transform: translate(-50%, calc(var(--youth-offset) - 6px + 12px)); }
+        .secondary-event.youth.v-offset-2 { transform: translate(-50%, calc(var(--youth-offset) - 6px + 24px)); }
+        .secondary-event.youth.v-offset-3 { transform: translate(-50%, calc(var(--youth-offset) - 6px + 36px)); }
         
-        .secondary-event.blessthun.v-offset-1:hover { transform: translate(-50%, calc(-50% + var(--blessthun-offset) - 12px)) scale(1.3); }
-        .secondary-event.blessthun.v-offset-2:hover { transform: translate(-50%, calc(-50% + var(--blessthun-offset) - 24px)) scale(1.3); }
-        .secondary-event.blessthun.v-offset-3:hover { transform: translate(-50%, calc(-50% + var(--blessthun-offset) - 36px)) scale(1.3); }
-        .secondary-event.youth.v-offset-1:hover { transform: translate(-50%, calc(-50% + var(--youth-offset) + 12px)) scale(1.3); }
-        .secondary-event.youth.v-offset-2:hover { transform: translate(-50%, calc(-50% + var(--youth-offset) + 24px)) scale(1.3); }
-        .secondary-event.youth.v-offset-3:hover { transform: translate(-50%, calc(-50% + var(--youth-offset) + 36px)) scale(1.3); }
+        .secondary-event.blessthun.v-offset-1:hover { transform: translate(-50%, calc(var(--blessthun-offset) - 6px - 12px)) scale(1.3); }
+        .secondary-event.blessthun.v-offset-2:hover { transform: translate(-50%, calc(var(--blessthun-offset) - 6px - 24px)) scale(1.3); }
+        .secondary-event.blessthun.v-offset-3:hover { transform: translate(-50%, calc(var(--blessthun-offset) - 6px - 36px)) scale(1.3); }
+        .secondary-event.youth.v-offset-1:hover { transform: translate(-50%, calc(var(--youth-offset) - 6px + 12px)) scale(1.3); }
+        .secondary-event.youth.v-offset-2:hover { transform: translate(-50%, calc(var(--youth-offset) - 6px + 24px)) scale(1.3); }
+        .secondary-event.youth.v-offset-3:hover { transform: translate(-50%, calc(var(--youth-offset) - 6px + 36px)) scale(1.3); }
 
         .event-square {
             width: 8px;
@@ -800,8 +798,8 @@
         /* Multi-day */
         .multiday-pill {
             position: absolute;
-            height: 12px;
-            border-radius: 6px;
+            height: 8px;
+            border-radius: 4px;
             z-index: 11;
             pointer-events: none;
             box-shadow: 0 1px 3px rgba(0,0,0,0.15);
@@ -810,13 +808,13 @@
         .multiday-pill.blessthun {
             background: var(--salmon);
             top: 2px;
-            transform: translateY(calc(-50% + var(--blessthun-offset)));
+            transform: translateY(calc(var(--blessthun-offset) - 4px));
         }
 
         .multiday-pill.youth {
             background: var(--mint);
             top: 2px;
-            transform: translateY(calc(-50% + var(--youth-offset)));
+            transform: translateY(calc(var(--youth-offset) - 4px));
         }
 
         .multiday-label {
@@ -837,21 +835,21 @@
 
         .multiday-label.blessthun-type {
             top: 2px;
-            transform: translateX(-50%) translateY(calc(-100% + var(--blessthun-offset) - 4px));
+            transform: translateX(-50%) translateY(calc(var(--blessthun-offset) - 4px - 100%));
         }
 
         .multiday-label.blessthun-type:hover {
-            transform: translateX(-50%) translateY(calc(-100% + var(--blessthun-offset) - 4px)) scale(1.05);
+            transform: translateX(-50%) translateY(calc(var(--blessthun-offset) - 4px - 100%)) scale(1.05);
         }
 
         .multiday-label.youth-type {
             top: 2px;
-            transform: translateX(-50%) translateY(calc(var(--youth-offset) + 4px));
+            transform: translateX(-50%) translateY(calc(var(--youth-offset) - 4px));
             flex-direction: column-reverse;
         }
 
         .multiday-label.youth-type:hover {
-            transform: translateX(-50%) translateY(calc(var(--youth-offset) + 4px)) scale(1.05);
+            transform: translateX(-50%) translateY(calc(var(--youth-offset) - 4px)) scale(1.05);
         }
 
         .multiday-label .event-connector {
