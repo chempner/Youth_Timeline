@@ -403,6 +403,89 @@
             padding: 100px 0;
         }
 
+        /* Holiday Bar */
+        .holiday-bar {
+            position: relative;
+            height: 28px;
+            margin: 0 30px 10px 30px;
+            background: var(--card-bg);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .holiday-pill {
+            position: absolute;
+            height: 20px;
+            top: 3px;
+            background: linear-gradient(135deg, #A78BFA, #8B5CF6);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 8px;
+            box-shadow: 0 1px 3px rgba(139, 92, 246, 0.3);
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            z-index: 5;
+            min-width: 20px;
+            overflow: hidden;
+        }
+
+        .holiday-pill:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(139, 92, 246, 0.4);
+            z-index: 10;
+        }
+
+        .holiday-pill-text {
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .holiday-pill.past {
+            opacity: 0.5;
+        }
+
+        .holiday-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1E293B;
+            color: white;
+            padding: 0.4rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 1000;
+            margin-bottom: 4px;
+        }
+
+        .holiday-pill:hover .holiday-tooltip {
+            opacity: 1;
+        }
+
+        .holiday-bar-label {
+            position: absolute;
+            left: -28px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.6rem;
+            color: var(--text-secondary);
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            transform: translateY(-50%) rotate(180deg);
+        }
+
         .timeline-track {
             position: relative;
             margin: 0 30px;
@@ -1551,6 +1634,7 @@
                 <div class="timeline-scroll-container">
                     <div class="timeline-content">
                         <div class="timeline-wrapper">
+                            <div class="holiday-bar" id="holiday-bar-1"></div>
                             <div class="timeline-track">
                                 <div class="timeline-line">
                                     <div class="timeline-dot-start"></div>
@@ -1572,6 +1656,7 @@
                 <div class="timeline-scroll-container">
                     <div class="timeline-content">
                         <div class="timeline-wrapper">
+                            <div class="holiday-bar" id="holiday-bar-2"></div>
                             <div class="timeline-track">
                                 <div class="timeline-line">
                                     <div class="timeline-dot-start"></div>
@@ -1743,6 +1828,7 @@
         };
 
         let events = { blessthun: [], youth: [] };
+        let holidays = [];
         let currentYear1 = new Date().getFullYear();
         let currentYear2 = currentYear1 + 1;
         let filters = { blessthun: true, youth: true };
@@ -2323,7 +2409,9 @@
             const todayStr = formatDateStr(new Date());
             
             multiDay.forEach(e => {
-                const width = Math.max(e.endPosition - e.startPosition, 3);
+                // Calculate actual width, with a small minimum (1% ≈ 3-4 days)
+                const rawWidth = e.endPosition - e.startPosition;
+                const width = Math.max(rawWidth, 1);
                 const center = e.startPosition + width/2;
                 const isPast = (e.endDate || e.startDate) < todayStr;
                 const pastClass = isPast ? ' past' : '';
@@ -2355,6 +2443,8 @@
         function renderAllTimelines() {
             renderTimelineEvents('timeline1-events', 'timeline1-months', 'timeline1-empty', currentYear1);
             renderTimelineEvents('timeline2-events', 'timeline2-months', 'timeline2-empty', currentYear2);
+            renderHolidayBar('holiday-bar-1', currentYear1);
+            renderHolidayBar('holiday-bar-2', currentYear2);
         }
 
         function getAllEvents(type) {
@@ -2611,13 +2701,67 @@
         }
 
         async function loadData() {
-            await Promise.all([fetchCalendar('blessthun'), fetchCalendar('youth')]);
+            await Promise.all([fetchCalendar('blessthun'), fetchCalendar('youth'), fetchHolidays()]);
             renderEventsList('blessthun');
             renderEventsList('youth');
             renderAllTimelines();
             updateCountdown();
             updateProgress();
             updateStats();
+        }
+
+        async function fetchHolidays() {
+            try {
+                const res = await fetch(`/calendars/holidays.ics?t=${Date.now()}`);
+                if (!res.ok) return;
+                const text = await res.text();
+                holidays = parseICS(text);
+            } catch (e) {
+                console.log('Holidays not available');
+            }
+        }
+
+        function renderHolidayBar(barId, year) {
+            const bar = document.getElementById(barId);
+            if (!bar) return;
+
+            const todayStr = formatDateStr(new Date());
+            const yearHolidays = holidays.filter(h => {
+                const startYear = parseInt((h.startDate || h.date).slice(0, 4));
+                const endYear = h.endDate ? parseInt(h.endDate.slice(0, 4)) : startYear;
+                return startYear === year || endYear === year || (startYear < year && endYear > year);
+            });
+
+            if (!yearHolidays.length) {
+                bar.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+            yearHolidays.forEach(h => {
+                const startDate = h.startDate || h.date;
+                const endDate = h.endDate || startDate;
+                
+                // Calculate positions for this year
+                let startPos = getPositionForDate(startDate, year);
+                let endPos = getPositionForDate(endDate, year);
+                
+                // Handle events that span year boundaries
+                if (startPos === null && endPos !== null) startPos = 0;
+                if (endPos === null && startPos !== null) endPos = 100;
+                if (startPos === null && endPos === null) return;
+
+                const width = Math.max(endPos - startPos, 2);
+                const isPast = endDate < todayStr;
+                const pastClass = isPast ? ' past' : '';
+
+                html += `<div class="holiday-pill${pastClass}" style="left:${startPos}%;width:${width}%" title="${h.name}">
+                    <span class="holiday-pill-text">${h.name}</span>
+                    <div class="holiday-tooltip">${h.name}</div>
+                </div>`;
+            });
+
+            bar.innerHTML = html;
         }
     </script>
 </body>

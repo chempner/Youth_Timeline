@@ -32,6 +32,10 @@ const ELVANTO_JSON = {
     youth_team: {
         calendarId: 'acaf434d-c2c0-41da-8403-73b1e3fabf92',
         baseUrl: 'https://blessthun.elvanto.eu/calendar/load.php'
+    },
+    holidays: {
+        calendarId: '5756734f-a711-406d-8e96-26aee23babb7',
+        baseUrl: 'https://blessthun.elvanto.eu/calendar/load.php'
     }
 };
 
@@ -260,13 +264,14 @@ async function fetchAllCalendars() {
         youth: await fetchCalendar('youth', 'youth.ics'),
         blessthun_team: await fetchCalendar('blessthun_team', 'blessthun_team.ics'),
         youth_team: await fetchCalendar('youth_team', 'youth_team.ics'),
+        holidays: await fetchCalendar('holidays', 'holidays.ics'),
         timestamp: new Date().toISOString()
     };
     
     config.lastFetch = results.timestamp;
     saveConfig(config);
     
-    console.log(`[${results.timestamp}] Fetch complete: blessthun=${results.blessthun}, youth=${results.youth}, blessthun_team=${results.blessthun_team}, youth_team=${results.youth_team}\n`);
+    console.log(`[${results.timestamp}] Fetch complete: blessthun=${results.blessthun}, youth=${results.youth}, blessthun_team=${results.blessthun_team}, youth_team=${results.youth_team}, holidays=${results.holidays}\n`);
     return results;
 }
 
