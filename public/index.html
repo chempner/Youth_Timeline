@@ -1731,20 +1731,34 @@
             for (let i=0; i<lines.length; i++) {
                 let line = lines[i].trim();
                 while (i+1<lines.length && (lines[i+1].startsWith(' ')||lines[i+1].startsWith('\t'))) { i++; line += lines[i].slice(1); }
-                if (line === 'BEGIN:VEVENT') cur = {};
+                if (line === 'BEGIN:VEVENT') cur = { _startDt: null, _endDt: null };
                 else if (line === 'END:VEVENT' && cur) {
                     if (cur.startDate && cur.name) {
                         let end = cur.endDate || cur.startDate;
                         if (cur.endIsAllDay && end !== cur.startDate) {
                             const ed = new Date(end+'T12:00:00'); ed.setDate(ed.getDate()-1); end = formatDateStr(ed);
                         }
+                        
+                        // Check if it's an overnight event (≤12 hours but spans 2 calendar days)
+                        let isOvernight = false;
+                        let isMultiDay = end !== cur.startDate;
+                        
+                        if (isMultiDay && cur._startDt && cur._endDt && !cur.startIsAllDay) {
+                            const durationHours = (cur._endDt - cur._startDt) / (1000 * 60 * 60);
+                            if (durationHours <= 12) {
+                                isOvernight = true;
+                                isMultiDay = false; // Don't show as pill
+                            }
+                        }
+                        
                         evts.push({ 
                             id: Date.now()+Math.random(), 
                             date: cur.startDate, 
                             startDate: cur.startDate, 
                             endDate: end, 
                             name: cur.name, 
-                            isMultiDay: end !== cur.startDate,
+                            isMultiDay: isMultiDay,
+                            isOvernight: isOvernight,
                             startTime: cur.startTime,
                             endTime: cur.endTime,
                             isAllDay: cur.startIsAllDay,
@@ -1763,6 +1777,7 @@
                                 cur.startDate = formatDateStr(p); 
                                 cur.startIsAllDay = isDateOnly || val.length===8;
                                 if (!cur.startIsAllDay) cur.startTime = formatTimeStr(p);
+                                cur._startDt = p;
                             } 
                         }
                         else if (key.startsWith('DTEND')) { 
@@ -1771,6 +1786,7 @@
                                 cur.endDate = formatDateStr(p); 
                                 cur.endIsAllDay = isDateOnly || val.length===8;
                                 if (!cur.endIsAllDay) cur.endTime = formatTimeStr(p);
+                                cur._endDt = p;
                             } 
                         }
                         else if (key === 'SUMMARY') cur.name = val;
@@ -1934,7 +1950,23 @@
                     const sd = e.startDate || e.date;
                     if (!sd || parseInt(sd.slice(0,4)) < MIN_YEAR) return;
                     
-                    if (e.isMultiDay && e.endDate) {
+                    // Overnight events: show as dot on both start and end dates
+                    if (e.isOvernight && e.endDate) {
+                        // Start date dot
+                        const posStart = getPositionForDate(sd, year);
+                        if (posStart !== null) {
+                            const d = new Date(sd+'T12:00:00');
+                            secondary.push({ ...e, type, position: posStart, month: monthNames[d.getMonth()], day: d.getDate(), displayDate: sd });
+                        }
+                        // End date dot (different day)
+                        if (e.endDate !== sd) {
+                            const posEnd = getPositionForDate(e.endDate, year);
+                            if (posEnd !== null) {
+                                const d = new Date(e.endDate+'T12:00:00');
+                                secondary.push({ ...e, type, position: posEnd, month: monthNames[d.getMonth()], day: d.getDate(), displayDate: e.endDate });
+                            }
+                        }
+                    } else if (e.isMultiDay && e.endDate) {
                         const sp = getPositionForDate(sd, year), ep = getPositionForDate(e.endDate, year);
                         if (sp !== null || ep !== null) {
                             const startD = new Date(sd+'T12:00:00'), endD = new Date(e.endDate+'T12:00:00');
@@ -1979,7 +2011,7 @@
             });
             
             secondary.forEach(e => {
-                const isPast = (e.startDate || e.date) < todayStr;
+                const isPast = (e.displayDate || e.startDate || e.date) < todayStr;
                 const pastClass = isPast ? ' past' : '';
                 html += `<div class="secondary-event ${e.type}${pastClass}" style="left:${e.position}%" onclick='openModal(${JSON.stringify(e).replace(/'/g,"&#39;")}, "${e.type}")'><div class="event-tooltip">${e.month} ${e.day}: ${e.name||'Event'}</div><div class="event-square ${e.type}"></div></div>`;
             });
