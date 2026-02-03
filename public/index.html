@@ -545,16 +545,51 @@
             margin-top: 4px;
         }
 
+        /* Vertical offsets for multiple different events on same day */
+        .event-marker.blessthun.v-offset-1 { margin-top: -22px; }
+        .event-marker.blessthun.v-offset-2 { margin-top: -40px; }
+        .event-marker.blessthun.v-offset-3 { margin-top: -58px; }
+        .event-marker.youth.v-offset-1 { margin-top: 22px; }
+        .event-marker.youth.v-offset-2 { margin-top: 40px; }
+        .event-marker.youth.v-offset-3 { margin-top: 58px; }
+
         .event-dot {
             width: 14px;
             height: 14px;
             border-radius: 50%;
             border: 3px solid white;
             box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            position: relative;
         }
 
         .event-dot.blessthun { background: var(--salmon); }
         .event-dot.youth { background: var(--mint); }
+
+        .event-count-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: var(--text-primary);
+            color: white;
+            font-size: 9px;
+            font-weight: 700;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid white;
+        }
+
+        [data-theme="dark"] .event-count-badge {
+            background: #F1F5F9;
+            color: #1E293B;
+        }
+
+        .event-square {
+            position: relative;
+        }
 
         .event-tooltip {
             position: absolute;
@@ -605,6 +640,14 @@
             top: 50%;
             margin-top: 2px;
         }
+
+        /* Vertical offsets for multiple different secondary events on same day */
+        .secondary-event.blessthun.v-offset-1 { margin-top: -14px; }
+        .secondary-event.blessthun.v-offset-2 { margin-top: -26px; }
+        .secondary-event.blessthun.v-offset-3 { margin-top: -38px; }
+        .secondary-event.youth.v-offset-1 { margin-top: 14px; }
+        .secondary-event.youth.v-offset-2 { margin-top: 26px; }
+        .secondary-event.youth.v-offset-3 { margin-top: 38px; }
 
         .event-square {
             width: 8px;
@@ -1952,13 +1995,11 @@
                     
                     // Overnight events: show as dot on both start and end dates
                     if (e.isOvernight && e.endDate) {
-                        // Start date dot
                         const posStart = getPositionForDate(sd, year);
                         if (posStart !== null) {
                             const d = new Date(sd+'T12:00:00');
                             secondary.push({ ...e, type, position: posStart, month: monthNames[d.getMonth()], day: d.getDate(), displayDate: sd });
                         }
-                        // End date dot (different day)
                         if (e.endDate !== sd) {
                             const posEnd = getPositionForDate(e.endDate, year);
                             if (posEnd !== null) {
@@ -1983,7 +2024,46 @@
                 });
             });
 
-            emptyEl.style.display = (primary.length || secondary.length || multiDay.length) ? 'none' : 'block';
+            // Group events by date+name+type (merge same-name events on same day)
+            function groupByDateNameType(evts) {
+                const groups = {};
+                evts.forEach(e => {
+                    const dateKey = e.displayDate || e.startDate || e.date;
+                    const key = `${dateKey}|${e.name}|${e.type}`;
+                    if (!groups[key]) {
+                        groups[key] = { ...e, occurrences: [e], dateKey };
+                    } else {
+                        groups[key].occurrences.push(e);
+                    }
+                });
+                return Object.values(groups);
+            }
+
+            // Assign vertical offsets for different events on same day+type
+            function assignVerticalOffsets(evts) {
+                // Group by date+type
+                const byDateType = {};
+                evts.forEach(e => {
+                    const key = `${e.dateKey || e.startDate || e.date}|${e.type}`;
+                    if (!byDateType[key]) byDateType[key] = [];
+                    byDateType[key].push(e);
+                });
+                
+                // Assign offsets within each group
+                Object.values(byDateType).forEach(group => {
+                    group.forEach((e, i) => {
+                        e.verticalOffset = i; // 0, 1, 2, etc.
+                    });
+                });
+            }
+
+            const groupedPrimary = groupByDateNameType(primary);
+            const groupedSecondary = groupByDateNameType(secondary);
+            
+            assignVerticalOffsets(groupedPrimary);
+            assignVerticalOffsets(groupedSecondary);
+
+            emptyEl.style.display = (groupedPrimary.length || groupedSecondary.length || multiDay.length) ? 'none' : 'block';
 
             const assignOffsets = evts => {
                 evts.sort((a,b) => a.startPosition - b.startPosition);
@@ -2010,16 +2090,22 @@
                 html += `<div class="multiday-label ${e.type}-type${e.offset?` offset-${e.offset}`:''}${pastClass}" style="left:${center}%" onclick='openModal(${JSON.stringify(e).replace(/'/g,"&#39;")}, "${e.type}")'><div class="event-label"><span class="event-month">${e.dateDisplay}</span><span class="event-name">${e.name||'Event'}</span></div><div class="event-connector"></div></div>`;
             });
             
-            secondary.forEach(e => {
+            groupedSecondary.forEach(e => {
                 const isPast = (e.displayDate || e.startDate || e.date) < todayStr;
                 const pastClass = isPast ? ' past' : '';
-                html += `<div class="secondary-event ${e.type}${pastClass}" style="left:${e.position}%" onclick='openModal(${JSON.stringify(e).replace(/'/g,"&#39;")}, "${e.type}")'><div class="event-tooltip">${e.month} ${e.day}: ${e.name||'Event'}</div><div class="event-square ${e.type}"></div></div>`;
+                const countBadge = e.occurrences.length > 1 ? `<span class="event-count-badge">${e.occurrences.length}</span>` : '';
+                const vOffset = e.verticalOffset || 0;
+                const offsetStyle = vOffset > 0 ? ` v-offset-${Math.min(vOffset, 3)}` : '';
+                html += `<div class="secondary-event ${e.type}${pastClass}${offsetStyle}" style="left:${e.position}%" onclick='openModal(${JSON.stringify(e).replace(/'/g,"&#39;")}, "${e.type}")'><div class="event-tooltip">${e.month} ${e.day}: ${e.name||'Event'}${e.occurrences.length > 1 ? ` (${e.occurrences.length}×)` : ''}</div><div class="event-square ${e.type}">${countBadge}</div></div>`;
             });
             
-            primary.forEach(e => {
+            groupedPrimary.forEach(e => {
                 const isPast = (e.startDate || e.date) < todayStr;
                 const pastClass = isPast ? ' past' : '';
-                html += `<div class="event-marker ${e.type}${pastClass}" style="left:${e.position}%" onclick='openModal(${JSON.stringify(e).replace(/'/g,"&#39;")}, "${e.type}")'><div class="event-tooltip">${e.month} ${e.day}: ${e.name||'Event'}</div><div class="event-dot ${e.type}"></div></div>`;
+                const countBadge = e.occurrences.length > 1 ? `<span class="event-count-badge">${e.occurrences.length}</span>` : '';
+                const vOffset = e.verticalOffset || 0;
+                const offsetStyle = vOffset > 0 ? ` v-offset-${Math.min(vOffset, 3)}` : '';
+                html += `<div class="event-marker ${e.type}${pastClass}${offsetStyle}" style="left:${e.position}%" onclick='openModal(${JSON.stringify(e).replace(/'/g,"&#39;")}, "${e.type}")'><div class="event-tooltip">${e.month} ${e.day}: ${e.name||'Event'}${e.occurrences.length > 1 ? ` (${e.occurrences.length}×)` : ''}</div><div class="event-dot ${e.type}">${countBadge}</div></div>`;
             });
 
             container.innerHTML = html;
@@ -2057,13 +2143,23 @@
             // Date
             const sd = new Date((e.startDate||e.date)+'T12:00:00');
             let dateText = sd.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
-            if (e.endDate && e.endDate !== e.startDate) dateText += ' - ' + new Date(e.endDate+'T12:00:00').toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+            if (e.endDate && e.endDate !== e.startDate && !e.isOvernight) dateText += ' - ' + new Date(e.endDate+'T12:00:00').toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
             document.getElementById('modal-date-text').textContent = dateText;
             
-            // Time
+            // Time - handle multiple occurrences (same name, different times)
             const timeEl = document.getElementById('modal-time');
             const timeText = document.getElementById('modal-time-text');
-            if (e.startTime && !e.isAllDay) {
+            
+            if (e.occurrences && e.occurrences.length > 1) {
+                // Multiple times for same event
+                const times = e.occurrences.map(occ => {
+                    let t = occ.startTime || 'All day';
+                    if (occ.endTime) t += ' – ' + occ.endTime;
+                    return t;
+                }).join('  •  ');
+                timeText.textContent = times;
+                timeEl.style.display = 'flex';
+            } else if (e.startTime && !e.isAllDay) {
                 let timeStr = e.startTime;
                 if (e.endTime) timeStr += ' – ' + e.endTime;
                 timeText.textContent = timeStr;
@@ -2075,25 +2171,40 @@
             // Location
             const locEl = document.getElementById('modal-location');
             const locText = document.getElementById('modal-location-text');
-            if (e.location) {
-                locText.textContent = e.location;
+            let location = e.location;
+            if (!location && e.occurrences) {
+                location = e.occurrences.find(o => o.location)?.location;
+            }
+            if (location) {
+                locText.textContent = location;
                 locEl.style.display = 'flex';
             } else {
                 locEl.style.display = 'none';
             }
             
-            // Other events on same day
+            // Other events on same day (different names only)
             const sameDayEl = document.getElementById('modal-same-day');
             const sameDayList = document.getElementById('same-day-list');
-            const eventDate = e.startDate || e.date;
+            const eventDate = e.displayDate || e.startDate || e.date;
             const allEvents = [...getAllEvents('blessthun'), ...getAllEvents('youth')];
             const otherEvents = allEvents.filter(ev => 
                 (ev.startDate === eventDate || ev.date === eventDate) && 
                 ev.name !== e.name
             );
             
-            if (otherEvents.length > 0) {
-                sameDayList.innerHTML = otherEvents.map(ev => {
+            // Deduplicate by name for display
+            const uniqueOtherEvents = [];
+            const seen = new Set();
+            otherEvents.forEach(ev => {
+                const key = `${ev.name}|${ev.type}`;
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    uniqueOtherEvents.push(ev);
+                }
+            });
+            
+            if (uniqueOtherEvents.length > 0) {
+                sameDayList.innerHTML = uniqueOtherEvents.map(ev => {
                     const evType = ev.type;
                     const timeStr = ev.startTime ? ev.startTime : 'All day';
                     return `<div class="same-day-item" onclick="openModal(${JSON.stringify(ev).replace(/"/g, '&quot;')}, '${evType}')">
