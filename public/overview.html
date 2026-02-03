@@ -505,7 +505,18 @@
         }
 
         function filterAndRender() {
-            const filtered = events.filter(e => e.start?.getFullYear() === currentYear).sort((a,b) => a.start - b.start);
+            let filtered = events.filter(e => e.start?.getFullYear() === currentYear).sort((a,b) => a.start - b.start);
+            
+            // Deduplicate: same name + same date = show only once
+            const seen = new Set();
+            filtered = filtered.filter(e => {
+                const dateStr = `${e.start.getFullYear()}-${e.start.getMonth()}-${e.start.getDate()}`;
+                const key = `${e.summary}|${dateStr}`;
+                if (seen.has(key)) return false;
+                seen.add(key);
+                return true;
+            });
+            
             updateStats(filtered);
             renderCalendar(filtered);
         }
