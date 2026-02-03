@@ -404,55 +404,57 @@
         }
 
         /* Holiday strips on the timeline */
-        .holiday-strip {
+        .holidays-container {
             position: absolute;
-            height: 16px;
+            left: 0;
+            right: 0;
             top: 50%;
             transform: translateY(-50%);
-            background: rgba(139, 92, 246, 0.25);
-            border-radius: 3px;
-            z-index: 5;
             pointer-events: none;
         }
 
-        .holiday-strip-label {
+        .holiday-strip {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: rgba(139, 92, 246, 0.9);
-            font-size: 0.55rem;
+            height: 22px;
+            background: linear-gradient(135deg, rgba(167, 139, 250, 0.85), rgba(139, 92, 246, 0.85));
+            border-radius: 4px;
+            z-index: 8;
+            pointer-events: auto;
+            cursor: default;
+            box-shadow: 0 2px 4px rgba(139, 92, 246, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .holiday-strip.row-0 { top: -11px; }
+        .holiday-strip.row-1 { top: -35px; }
+        .holiday-strip.row-2 { top: -59px; }
+        .holiday-strip.row-3 { top: -83px; }
+
+        .holiday-strip-label {
+            color: white;
+            font-size: 0.65rem;
             font-weight: 600;
             white-space: nowrap;
-            pointer-events: none;
-            text-shadow: 0 0 3px var(--card-bg), 0 0 5px var(--card-bg);
-            z-index: 6;
+            padding: 0 6px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         [data-theme="dark"] .holiday-strip {
-            background: rgba(139, 92, 246, 0.2);
-        }
-
-        [data-theme="dark"] .holiday-strip-label {
-            color: rgba(167, 139, 250, 0.9);
+            background: linear-gradient(135deg, rgba(167, 139, 250, 0.9), rgba(139, 92, 246, 0.9));
         }
 
         .holiday-strip.past {
-            opacity: 0.4;
+            opacity: 0.45;
         }
 
         .timeline-track {
             position: relative;
             margin: 0 30px;
-        }
-
-        .holidays-container {
-            position: absolute;
-            left: 0;
-            right: 0;
-            top: 0;
-            bottom: 0;
-            pointer-events: none;
         }
 
         .timeline-line {
@@ -2715,28 +2717,39 @@
                 return;
             }
 
-            let html = '';
-            yearHolidays.forEach(h => {
+            // Calculate positions and sort by start
+            const holidaysWithPos = yearHolidays.map(h => {
                 const startDate = h.startDate || h.date;
                 const endDate = h.endDate || startDate;
-                
-                // Calculate positions for this year
                 let startPos = getPositionForDate(startDate, year);
                 let endPos = getPositionForDate(endDate, year);
-                
-                // Handle events that span year boundaries
                 if (startPos === null && endPos !== null) startPos = 0;
                 if (endPos === null && startPos !== null) endPos = 100;
-                if (startPos === null && endPos === null) return;
+                return { ...h, startPos, endPos, startDate, endDate };
+            }).filter(h => h.startPos !== null || h.endPos !== null)
+              .sort((a, b) => a.startPos - b.startPos);
 
-                const width = Math.max(endPos - startPos, 1);
-                const isPast = endDate < todayStr;
+            // Assign rows to avoid overlaps
+            const rows = [];
+            holidaysWithPos.forEach(h => {
+                let row = 0;
+                while (rows[row] && rows[row] > h.startPos) {
+                    row++;
+                }
+                h.row = row;
+                rows[row] = h.endPos + 2; // Add small gap
+            });
+
+            let html = '';
+            holidaysWithPos.forEach(h => {
+                const width = Math.max(h.endPos - h.startPos, 1);
+                const isPast = h.endDate < todayStr;
                 const pastClass = isPast ? ' past' : '';
+                const rowClass = ` row-${Math.min(h.row, 3)}`;
 
-                // Only show label if width is enough (more than ~5%)
-                const label = width > 4 ? `<span class="holiday-strip-label">${h.name}</span>` : '';
-
-                html += `<div class="holiday-strip${pastClass}" style="left:${startPos}%;width:${width}%">${label}</div>`;
+                html += `<div class="holiday-strip${pastClass}${rowClass}" style="left:${h.startPos}%;width:${width}%">
+                    <span class="holiday-strip-label">${h.name}</span>
+                </div>`;
             });
 
             container.innerHTML = html;
