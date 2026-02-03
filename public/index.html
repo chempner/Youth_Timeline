@@ -1448,6 +1448,10 @@
                 </svg>
             </button>
 
+            <button class="btn-icon" onclick="toggleLanguage()" title="Sprache / Language">
+                <span id="lang-icon" style="font-size: 14px; font-weight: 600;">DE</span>
+            </button>
+
             <div class="pdf-dropdown">
                 <button class="btn-icon" onclick="toggleShareMenu()" title="Share">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1651,8 +1655,89 @@
         const MIN_YEAR = 2026;
         const YEAR_RANGE = [2025, 2026, 2027, 2028, 2029, 2030];
         const PRIMARY_EVENTS = { 'blessthun': 'BlessThun', 'youth': 'Youth Revival' };
-        const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-        const monthShort = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        
+        const translations = {
+            en: {
+                months: ['January','February','March','April','May','June','July','August','September','October','November','December'],
+                monthsShort: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+                timeline: 'Timeline',
+                yearlyOverview: 'Yearly Overview',
+                eventTimeline: 'Event Timeline',
+                twoYearOverview: 'Two-Year Overview',
+                nextEvent: 'Next Event',
+                inDays: 'In {n} days',
+                tomorrow: 'Tomorrow',
+                today: 'Today',
+                search: 'Search...',
+                sync: 'Sync',
+                pdf: 'PDF',
+                a4Landscape: 'A4 Landscape',
+                a3Landscape: 'A3 Landscape',
+                share: 'Share',
+                scanToOpen: 'Scan to open',
+                yearProgress: 'Year Progress',
+                jumpToToday: 'Jump to Today',
+                blessthunEvents: 'BlessThun Events',
+                youthEvents: 'Youth Revival Events',
+                upcoming: 'Upcoming',
+                busiestMonth: 'Busiest Month',
+                noEvents: 'No events for this year',
+                events: 'events',
+                loading: 'Loading...',
+                addToCalendar: 'Add to Calendar',
+                close: 'Close',
+                alsoOnThisDay: 'Also on this day:',
+                synced: 'Synced',
+                neverSynced: 'Never synced',
+                enableNotifications: 'Get notified before events?',
+                enable: 'Enable',
+                linkCopied: 'Link copied!',
+                eventDownloaded: 'Event downloaded!',
+                generating: 'Generating...',
+                downloadComplete: 'Download complete!',
+                jumpedToToday: 'Jumped to today!'
+            },
+            de: {
+                months: ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'],
+                monthsShort: ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'],
+                timeline: 'Timeline',
+                yearlyOverview: 'Tabellenübersicht',
+                eventTimeline: 'Event Timeline',
+                twoYearOverview: 'Zwei-Jahres-Übersicht',
+                nextEvent: 'Nächstes Event',
+                inDays: 'In {n} Tagen',
+                tomorrow: 'Morgen',
+                today: 'Heute',
+                search: 'Suchen...',
+                sync: 'Sync',
+                pdf: 'PDF',
+                a4Landscape: 'A4 Querformat',
+                a3Landscape: 'A3 Querformat',
+                share: 'Teilen',
+                scanToOpen: 'Scannen zum Öffnen',
+                yearProgress: 'Jahresfortschritt',
+                jumpToToday: 'Zu Heute springen',
+                blessthunEvents: 'BlessThun Events',
+                youthEvents: 'Youth Revival Events',
+                upcoming: 'Bevorstehend',
+                busiestMonth: 'Meiste Events',
+                noEvents: 'Keine Events für dieses Jahr',
+                events: 'Events',
+                loading: 'Laden...',
+                addToCalendar: 'Zum Kalender hinzufügen',
+                close: 'Schliessen',
+                alsoOnThisDay: 'Auch an diesem Tag:',
+                synced: 'Synchronisiert',
+                neverSynced: 'Nie synchronisiert',
+                enableNotifications: 'Benachrichtigungen aktivieren?',
+                enable: 'Aktivieren',
+                linkCopied: 'Link kopiert!',
+                eventDownloaded: 'Event heruntergeladen!',
+                generating: 'Erstelle...',
+                downloadComplete: 'Download fertig!',
+                jumpedToToday: 'Zu heute gesprungen!'
+            }
+        };
 
         let events = { blessthun: [], youth: [] };
         let currentYear1 = new Date().getFullYear();
@@ -1661,15 +1746,126 @@
         let searchQuery = '';
         let currentModalEvent = null;
         let darkMode = localStorage.getItem('darkMode') === 'true';
+        let currentLang = localStorage.getItem('language') || 'en';
+
+        // Get current translation
+        function t(key) {
+            return translations[currentLang][key] || translations['en'][key] || key;
+        }
+
+        // Get month names for current language
+        function getMonthNames() {
+            return translations[currentLang].months;
+        }
+        function getMonthShort() {
+            return translations[currentLang].monthsShort;
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             initYearPickers();
             loadData();
             updateStatus();
             initDarkMode();
+            initLanguage();
             checkNotificationPermission();
             setInterval(updateCountdown, 60000);
         });
+
+        function initLanguage() {
+            applyTranslations();
+            updateLangIcon();
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'de' : 'en';
+            localStorage.setItem('language', currentLang);
+            applyTranslations();
+            updateLangIcon();
+            renderAllTimelines();
+            updateStats();
+            updateCountdown();
+        }
+
+        function updateLangIcon() {
+            document.getElementById('lang-icon').textContent = currentLang === 'en' ? 'DE' : 'EN';
+        }
+
+        function applyTranslations() {
+            // Nav
+            document.querySelector('a[href="/overview"]').innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                ${t('yearlyOverview')}`;
+            
+            // Header
+            document.querySelector('header h1').textContent = t('eventTimeline');
+            document.querySelector('header .subtitle').textContent = t('twoYearOverview');
+            document.querySelector('.countdown-label').textContent = t('nextEvent');
+            
+            // Notification prompt
+            document.querySelector('#notification-prompt span').textContent = '🔔 ' + t('enableNotifications');
+            document.querySelector('#notification-prompt .btn').textContent = t('enable');
+            
+            // Search
+            document.querySelector('.search-input').placeholder = t('search');
+            
+            // Buttons
+            document.querySelector('#resync-btn').innerHTML = `
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+                </svg>
+                ${t('sync')}`;
+            
+            // PDF menu
+            const pdfMenu = document.getElementById('pdf-menu');
+            if (pdfMenu) {
+                pdfMenu.innerHTML = `
+                    <button onclick="downloadPDF('a4')">${t('a4Landscape')}</button>
+                    <button onclick="downloadPDF('a3')">${t('a3Landscape')}</button>`;
+            }
+            
+            // Share
+            const shareMenu = document.getElementById('share-menu');
+            if (shareMenu) {
+                shareMenu.querySelector('h4').textContent = t('share');
+                shareMenu.querySelector('.qr-label').textContent = t('scanToOpen');
+            }
+            
+            // Progress section
+            document.getElementById('progress-label').textContent = t('yearProgress');
+            document.querySelector('.jump-today-btn').innerHTML = `
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/>
+                </svg>
+                ${t('jumpToToday')}`;
+            
+            // Stats
+            const statLabels = document.querySelectorAll('.stat-label');
+            if (statLabels.length >= 4) {
+                statLabels[0].textContent = t('blessthunEvents');
+                statLabels[1].textContent = t('youthEvents');
+                statLabels[2].textContent = t('upcoming');
+                statLabels[3].textContent = t('busiestMonth');
+            }
+            
+            // Timeline empty states
+            document.getElementById('timeline1-empty').textContent = t('noEvents');
+            document.getElementById('timeline2-empty').textContent = t('noEvents');
+            
+            // List headers
+            document.querySelectorAll('.list-title')[0].textContent = t('blessthunEvents');
+            document.querySelectorAll('.list-title')[1].textContent = t('youthEvents');
+            
+            // Modal
+            document.querySelector('.same-day-label').textContent = t('alsoOnThisDay');
+            document.querySelector('.modal-actions .btn-success').innerHTML = `
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                ${t('addToCalendar')}`;
+            document.querySelector('.modal-actions .btn:not(.btn-success)').textContent = t('close');
+        }
 
         function initDarkMode() {
             if (darkMode) {
@@ -1766,7 +1962,12 @@
             banner.style.display = 'block';
             banner.className = `countdown-banner ${upcoming.type}-next`;
             document.getElementById('countdown-event').textContent = upcoming.name;
-            document.getElementById('countdown-time').textContent = diffDays === 0 ? 'Today!' : diffDays === 1 ? 'Tomorrow!' : `In ${diffDays} days`;
+            
+            let timeText;
+            if (diffDays === 0) timeText = t('today') + '!';
+            else if (diffDays === 1) timeText = t('tomorrow') + '!';
+            else timeText = t('inDays').replace('{n}', diffDays);
+            document.getElementById('countdown-time').textContent = timeText;
         }
 
         function parseICalDate(s) {
@@ -1878,7 +2079,7 @@
                 const res = await fetch('/api/resync', { method: 'POST' });
                 const r = await res.json();
                 if (r.success) {
-                    showToast('Synced!', 'success');
+                    showToast(t('synced') + '!', 'success');
                     await loadData();
                     await updateStatus();
                 } else {
@@ -1886,7 +2087,7 @@
                 }
             } catch (e) { showToast('Sync failed', 'error'); }
             btn.disabled = false;
-            btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg> Sync';
+            btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg> ${t('sync')}`;
         }
 
         function togglePdfMenu() {
@@ -1895,7 +2096,7 @@
 
         async function downloadPDF(format = 'a3') {
             document.getElementById('pdf-menu').classList.remove('show');
-            showToast('Generating PDF...', 'success');
+            showToast(t('generating'), 'success');
             
             // Page dimensions in mm (landscape)
             const sizes = {
@@ -1942,7 +2143,7 @@
                 
                 pdf.addImage(canvas.toDataURL('image/png'), 'PNG', x, y, imgWidth, imgHeight);
                 pdf.save(`Timeline-${currentYear1}-${currentYear2}-${format.toUpperCase()}.pdf`);
-                showToast('PDF downloaded!', 'success');
+                showToast(t('downloadComplete'), 'success');
             } catch (e) { 
                 console.error(e);
                 showToast('PDF failed', 'error'); 
@@ -1953,21 +2154,23 @@
             try {
                 const res = await fetch('/api/status');
                 const s = await res.json();
-                document.getElementById('last-sync').textContent = s.lastFetch ? `Synced: ${new Date(s.lastFetch).toLocaleString()}` : 'Never synced';
+                document.getElementById('last-sync').textContent = s.lastFetch ? `${t('synced')}: ${new Date(s.lastFetch).toLocaleString()}` : t('neverSynced');
             } catch {}
         }
 
         function renderEventsList(type) {
             const list = document.getElementById(`${type}-list`), count = document.getElementById(`${type}-count`);
             let evts = filters[type] ? getVisibleEvents(type).filter(matchesSearch) : [];
-            count.textContent = `${evts.length} event${evts.length!==1?'s':''}`;
-            if (!evts.length) { list.innerHTML = '<div class="events-list-empty">No events</div>'; return; }
+            count.textContent = `${evts.length} ${t('events')}`;
+            if (!evts.length) { list.innerHTML = `<div class="events-list-empty">${t('noEvents')}</div>`; return; }
             evts.sort((a,b) => a.startDate.localeCompare(b.startDate));
+            const locale = currentLang === 'de' ? 'de-CH' : 'en-US';
             list.innerHTML = evts.map(e => {
                 const sd = new Date(e.startDate+'T12:00:00');
-                let dateStr = sd.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
-                if (e.endDate && e.endDate !== e.startDate) dateStr += ' - ' + new Date(e.endDate+'T12:00:00').toLocaleDateString('en-US', { month:'short', day:'numeric' });
+                let dateStr = sd.toLocaleDateString(locale, { month:'short', day:'numeric', year:'numeric' });
+                if (e.endDate && e.endDate !== e.startDate) dateStr += ' - ' + new Date(e.endDate+'T12:00:00').toLocaleDateString(locale, { month:'short', day:'numeric' });
                 return `<div class="events-list-item" onclick='openModal(${JSON.stringify(e).replace(/'/g,"&#39;")}, "${type}")'><span class="events-list-name">${e.name}</span><span class="events-list-date">${dateStr}</span></div>`;
+            }).join('');
             }).join('');
         }
 
@@ -1982,9 +2185,10 @@
 
         function renderMonthMarkers(id, year) {
             let html = '';
+            const months = getMonthShort();
             for (let m=0; m<12; m++) {
                 const pos = getPositionForDate(`${year}-${String(m+1).padStart(2,'0')}-01`, year);
-                if (pos !== null) html += `<div class="month-marker" style="left:${pos}%"><div class="month-marker-line"></div><span class="month-marker-label">${monthShort[m]}</span></div>`;
+                if (pos !== null) html += `<div class="month-marker" style="left:${pos}%"><div class="month-marker-line"></div><span class="month-marker-label">${months[m]}</span></div>`;
             }
             document.getElementById(id).innerHTML = html;
         }
@@ -2002,6 +2206,8 @@
             renderMonthMarkers(monthsId, year);
             
             const primary = [], secondary = [], multiDay = [];
+            const monthNames = getMonthNames();
+            const monthShort = getMonthShort();
             
             ['blessthun','youth'].forEach(type => {
                 if (!filters[type]) return;
@@ -2255,7 +2461,7 @@
             a.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
             a.download = `${e.name.replace(/[^a-zA-Z0-9]/g,'_')}.ics`;
             a.click();
-            showToast('Event downloaded!', 'success');
+            showToast(t('eventDownloaded'), 'success');
             closeModal();
         }
 
@@ -2292,6 +2498,7 @@
             
             let busiestMonth = '-';
             let maxCount = 0;
+            const monthShort = getMonthShort();
             Object.entries(monthCounts).forEach(([month, count]) => {
                 if (count > maxCount) {
                     maxCount = count;
@@ -2325,7 +2532,7 @@
                 const todayMarker = document.querySelector('.today-marker');
                 if (todayMarker) {
                     todayMarker.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-                    showToast('Jumped to today!', 'success');
+                    showToast(t('jumpedToToday'), 'success');
                 }
             }, 100);
         }
@@ -2348,7 +2555,7 @@
 
         function copyLink() {
             navigator.clipboard.writeText(window.location.href);
-            showToast('Link copied!', 'success');
+            showToast(t('linkCopied'), 'success');
             document.getElementById('share-menu').classList.remove('show');
         }
 
