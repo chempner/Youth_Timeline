@@ -411,7 +411,7 @@
             left: 0;
             right: 0;
             top: 0;
-            bottom: 0;
+            height: 100%;
             pointer-events: none;
             z-index: 5;
         }
@@ -2761,7 +2761,7 @@
                 // Filter out Ramadan
                 if (h.name && h.name.toLowerCase().includes('ramadan')) return false;
                 
-                // Only multi-day events (>2 days)
+                // Only multi-day events (>=2 days)
                 const startDate = h.startDate || h.date;
                 const endDate = h.endDate || startDate;
                 const start = new Date(startDate + 'T12:00:00');
@@ -2780,7 +2780,7 @@
                 return;
             }
 
-            // Calculate positions and sort by start
+            // Calculate positions and width for each holiday
             const holidaysWithPos = yearHolidays.map(h => {
                 const startDate = h.startDate || h.date;
                 const endDate = h.endDate || startDate;
@@ -2788,28 +2788,46 @@
                 let endPos = getPositionForDate(endDate, year);
                 if (startPos === null && endPos !== null) startPos = 0;
                 if (endPos === null && startPos !== null) endPos = 100;
-                return { ...h, startPos, endPos, startDate, endDate };
-            }).filter(h => h.startPos !== null || h.endPos !== null)
-              .sort((a, b) => a.startPos - b.startPos);
+                const width = (endPos || 0) - (startPos || 0);
+                return { ...h, startPos, endPos, startDate, endDate, width };
+            }).filter(h => h.startPos !== null || h.endPos !== null);
 
-            // Assign rows to avoid overlaps
-            const rows = [];
+            // Sort by width descending - longest holidays first
+            holidaysWithPos.sort((a, b) => b.width - a.width);
+
+            // Assign rows: longest goes to row 0 (center), others stack above
+            // Row 0 = on the line, row 1/2/3 = above the line
+            const rows = []; // rows[n] = array of holidays in that row
+            
             holidaysWithPos.forEach(h => {
-                let row = 0;
-                while (rows[row] && rows[row] > h.startPos) {
-                    row++;
+                // Try to find a row where this holiday doesn't overlap
+                let assignedRow = -1;
+                for (let row = 0; row <= 3; row++) {
+                    if (!rows[row]) rows[row] = [];
+                    
+                    // Check if this holiday overlaps with any holiday in this row
+                    const hasOverlap = rows[row].some(other => 
+                        !(h.endPos <= other.startPos || h.startPos >= other.endPos)
+                    );
+                    
+                    if (!hasOverlap) {
+                        assignedRow = row;
+                        rows[row].push(h);
+                        break;
+                    }
                 }
-                h.row = row;
-                rows[row] = h.endPos + 2; // Add small gap
+                
+                h.row = assignedRow >= 0 ? assignedRow : 3; // Default to row 3 if all full
             });
 
+            // Generate HTML
             let html = '';
             const locale = currentLang === 'de' ? 'de-CH' : 'en-US';
             holidaysWithPos.forEach(h => {
-                const width = Math.max(h.endPos - h.startPos, 1);
+                const width = Math.max(h.width, 1);
                 const isPast = h.endDate < todayStr;
                 const pastClass = isPast ? ' past' : '';
-                const rowClass = h.row > 0 ? ` row-${Math.min(h.row, 3)}` : '';
+                const rowClass = h.row > 0 ? ` row-${h.row}` : '';
                 
                 // Format dates for tooltip
                 const startD = new Date(h.startDate + 'T12:00:00');
