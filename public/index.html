@@ -403,92 +403,56 @@
             padding: 100px 0;
         }
 
-        /* Holiday Bar */
-        .holiday-bar {
-            position: relative;
-            height: 28px;
-            margin: 0 30px 10px 30px;
-            background: var(--card-bg);
-            border-radius: 6px;
-            border: 1px solid var(--border);
-            overflow: hidden;
-        }
-
-        .holiday-pill {
+        /* Holiday strips on the timeline */
+        .holiday-strip {
             position: absolute;
-            height: 20px;
-            top: 3px;
-            background: linear-gradient(135deg, #A78BFA, #8B5CF6);
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 8px;
-            box-shadow: 0 1px 3px rgba(139, 92, 246, 0.3);
-            cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            z-index: 5;
-            min-width: 20px;
-            overflow: hidden;
-        }
-
-        .holiday-pill:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 3px 8px rgba(139, 92, 246, 0.4);
-            z-index: 10;
-        }
-
-        .holiday-pill-text {
-            color: white;
-            font-size: 0.65rem;
-            font-weight: 600;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-        }
-
-        .holiday-pill.past {
-            opacity: 0.5;
-        }
-
-        .holiday-tooltip {
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #1E293B;
-            color: white;
-            padding: 0.4rem 0.6rem;
-            border-radius: 6px;
-            font-size: 0.7rem;
-            white-space: nowrap;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s ease;
-            z-index: 1000;
-            margin-bottom: 4px;
-        }
-
-        .holiday-pill:hover .holiday-tooltip {
-            opacity: 1;
-        }
-
-        .holiday-bar-label {
-            position: absolute;
-            left: -28px;
+            height: 16px;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 0.6rem;
-            color: var(--text-secondary);
-            writing-mode: vertical-rl;
-            text-orientation: mixed;
-            transform: translateY(-50%) rotate(180deg);
+            background: rgba(139, 92, 246, 0.25);
+            border-radius: 3px;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .holiday-strip-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: rgba(139, 92, 246, 0.9);
+            font-size: 0.55rem;
+            font-weight: 600;
+            white-space: nowrap;
+            pointer-events: none;
+            text-shadow: 0 0 3px var(--card-bg), 0 0 5px var(--card-bg);
+            z-index: 6;
+        }
+
+        [data-theme="dark"] .holiday-strip {
+            background: rgba(139, 92, 246, 0.2);
+        }
+
+        [data-theme="dark"] .holiday-strip-label {
+            color: rgba(167, 139, 250, 0.9);
+        }
+
+        .holiday-strip.past {
+            opacity: 0.4;
         }
 
         .timeline-track {
             position: relative;
             margin: 0 30px;
+        }
+
+        .holidays-container {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            pointer-events: none;
         }
 
         .timeline-line {
@@ -732,7 +696,7 @@
         .secondary-event.blessthun {
             top: 50%;
             transform: translate(-50%, -100%);
-            margin-top: -2px;
+            margin-top: -12px;
         }
 
         .secondary-event.blessthun:hover {
@@ -741,16 +705,16 @@
 
         .secondary-event.youth {
             top: 50%;
-            margin-top: 2px;
+            margin-top: 12px;
         }
 
         /* Vertical offsets for multiple different secondary events on same day */
-        .secondary-event.blessthun.v-offset-1 { margin-top: -14px; }
-        .secondary-event.blessthun.v-offset-2 { margin-top: -26px; }
-        .secondary-event.blessthun.v-offset-3 { margin-top: -38px; }
-        .secondary-event.youth.v-offset-1 { margin-top: 14px; }
-        .secondary-event.youth.v-offset-2 { margin-top: 26px; }
-        .secondary-event.youth.v-offset-3 { margin-top: 38px; }
+        .secondary-event.blessthun.v-offset-1 { margin-top: -24px; }
+        .secondary-event.blessthun.v-offset-2 { margin-top: -36px; }
+        .secondary-event.blessthun.v-offset-3 { margin-top: -48px; }
+        .secondary-event.youth.v-offset-1 { margin-top: 24px; }
+        .secondary-event.youth.v-offset-2 { margin-top: 36px; }
+        .secondary-event.youth.v-offset-3 { margin-top: 48px; }
 
         .event-square {
             width: 8px;
@@ -796,13 +760,13 @@
         .multiday-pill.blessthun {
             background: var(--salmon);
             top: 50%;
-            transform: translateY(-15px);
+            transform: translateY(-20px);
         }
 
         .multiday-pill.youth {
             background: var(--mint);
             top: 50%;
-            transform: translateY(7px);
+            transform: translateY(12px);
         }
 
         .multiday-label {
@@ -1634,8 +1598,8 @@
                 <div class="timeline-scroll-container">
                     <div class="timeline-content">
                         <div class="timeline-wrapper">
-                            <div class="holiday-bar" id="holiday-bar-1"></div>
                             <div class="timeline-track">
+                                <div class="holidays-container" id="holidays-1"></div>
                                 <div class="timeline-line">
                                     <div class="timeline-dot-start"></div>
                                     <div class="timeline-dot-end"></div>
@@ -1656,8 +1620,8 @@
                 <div class="timeline-scroll-container">
                     <div class="timeline-content">
                         <div class="timeline-wrapper">
-                            <div class="holiday-bar" id="holiday-bar-2"></div>
                             <div class="timeline-track">
+                                <div class="holidays-container" id="holidays-2"></div>
                                 <div class="timeline-line">
                                     <div class="timeline-dot-start"></div>
                                     <div class="timeline-dot-end"></div>
@@ -2443,8 +2407,8 @@
         function renderAllTimelines() {
             renderTimelineEvents('timeline1-events', 'timeline1-months', 'timeline1-empty', currentYear1);
             renderTimelineEvents('timeline2-events', 'timeline2-months', 'timeline2-empty', currentYear2);
-            renderHolidayBar('holiday-bar-1', currentYear1);
-            renderHolidayBar('holiday-bar-2', currentYear2);
+            renderHolidays('holidays-1', currentYear1);
+            renderHolidays('holidays-2', currentYear2);
         }
 
         function getAllEvents(type) {
@@ -2721,9 +2685,9 @@
             }
         }
 
-        function renderHolidayBar(barId, year) {
-            const bar = document.getElementById(barId);
-            if (!bar) return;
+        function renderHolidays(containerId, year) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
 
             const todayStr = formatDateStr(new Date());
             const yearHolidays = holidays.filter(h => {
@@ -2733,7 +2697,7 @@
             });
 
             if (!yearHolidays.length) {
-                bar.innerHTML = '';
+                container.innerHTML = '';
                 return;
             }
 
@@ -2751,17 +2715,17 @@
                 if (endPos === null && startPos !== null) endPos = 100;
                 if (startPos === null && endPos === null) return;
 
-                const width = Math.max(endPos - startPos, 2);
+                const width = Math.max(endPos - startPos, 1);
                 const isPast = endDate < todayStr;
                 const pastClass = isPast ? ' past' : '';
 
-                html += `<div class="holiday-pill${pastClass}" style="left:${startPos}%;width:${width}%" title="${h.name}">
-                    <span class="holiday-pill-text">${h.name}</span>
-                    <div class="holiday-tooltip">${h.name}</div>
-                </div>`;
+                // Only show label if width is enough (more than ~5%)
+                const label = width > 4 ? `<span class="holiday-strip-label">${h.name}</span>` : '';
+
+                html += `<div class="holiday-strip${pastClass}" style="left:${startPos}%;width:${width}%">${label}</div>`;
             });
 
-            bar.innerHTML = html;
+            container.innerHTML = html;
         }
     </script>
 </body>
