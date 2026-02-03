@@ -121,10 +121,12 @@
         .toggle-btn.active { color: white; }
         .toggle-btn.blessthun.active { background: var(--salmon); }
         .toggle-btn.youth.active { background: var(--mint); }
+        .toggle-btn.team.active { background: #6366F1; }
 
         .toggle-dot { width: 10px; height: 10px; border-radius: 50%; }
         .toggle-btn.blessthun .toggle-dot { background: var(--salmon); }
         .toggle-btn.youth .toggle-dot { background: var(--mint); }
+        .toggle-btn.team .toggle-dot { background: #6366F1; }
         .toggle-btn.active .toggle-dot { background: white; }
 
         .year-select {
@@ -215,6 +217,7 @@
         .calendar-title .dot { width: 14px; height: 14px; border-radius: 50%; }
         .calendar-title .dot.blessthun { background: var(--salmon); }
         .calendar-title .dot.youth { background: var(--mint); }
+        .calendar-title .dot.team { background: #6366F1; }
 
         .calendar-year { font-size: 22px; font-weight: 900; color: var(--paper-text); }
 
@@ -337,6 +340,10 @@
                 <button class="toggle-btn youth" onclick="setCalendar('youth')">
                     <span class="toggle-dot"></span>
                     Youth Revival
+                </button>
+                <button class="toggle-btn team" onclick="setCalendar('team')">
+                    <span class="toggle-dot"></span>
+                    Teamkalender
                 </button>
             </div>
 
@@ -518,7 +525,12 @@
         }
 
         function renderCalendar(filtered) {
-            const name = currentCalendar === 'blessthun' ? 'BLESSTHUN EVENTS' : 'YOUTH REVIVAL EVENTS';
+            const names = {
+                blessthun: 'BLESSTHUN EVENTS',
+                youth: 'YOUTH REVIVAL EVENTS',
+                team: 'TEAMKALENDER EVENTS'
+            };
+            const name = names[currentCalendar] || 'EVENTS';
             const monthsHtml = MONTHS.map((m, i) => {
                 const me = filtered.filter(e => e.start.getMonth() === i);
                 const evHtml = me.length === 0 ? '<p class="no-events">No events</p>' : me.map(e => `<div class="event-card"><div class="event-name">${e.summary}</div><div class="event-date">${formatDateRange(e)}</div></div>`).join('');

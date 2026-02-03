@@ -24,6 +24,10 @@ const ELVANTO_JSON = {
     youth: {
         calendarId: '60a53343-8476-4ccd-8b1b-729f8ce7c5b8',
         baseUrl: 'https://blessthun.elvanto.eu/calendar/load.php'
+    },
+    team: {
+        calendarId: '2b2b16bb-5f53-49db-bd4e-d58815b5239b',
+        baseUrl: 'https://blessthun.elvanto.eu/calendar/load.php'
     }
 };
 
@@ -250,13 +254,14 @@ async function fetchAllCalendars() {
     const results = {
         blessthun: await fetchCalendar('blessthun', 'blessthun.ics'),
         youth: await fetchCalendar('youth', 'youth.ics'),
+        team: await fetchCalendar('team', 'team.ics'),
         timestamp: new Date().toISOString()
     };
     
     config.lastFetch = results.timestamp;
     saveConfig(config);
     
-    console.log(`[${results.timestamp}] Fetch complete: blessthun=${results.blessthun}, youth=${results.youth}\n`);
+    console.log(`[${results.timestamp}] Fetch complete: blessthun=${results.blessthun}, youth=${results.youth}, team=${results.team}\n`);
     return results;
 }
 
@@ -283,7 +288,8 @@ app.get('/api/status', (req, res) => {
         lastFetch: config.lastFetch,
         hasUrls: {
             blessthun: true,
-            youth: true
+            youth: true,
+            team: true
         }
     });
 });
