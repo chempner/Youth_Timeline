@@ -25,6 +25,14 @@
             --border: #E5E7EB;
             --shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
             --today: #3B82F6;
+
+            /* Timeline geometry */
+            --timeline-center: 50%;
+            --stack-gap: 18px;
+
+            /* Visual baselines (tuned by eye) */
+            --youth-baseline: 11px;        /* below center */
+            --blessthun-baseline: -11px;   /* above center */
         }
 
         [data-theme="dark"] {
@@ -627,9 +635,8 @@
         }
 
         .event-marker.blessthun {
-            top: 50%;
-            transform: translate(-50%, -100%);
-            margin-top: -10px;
+            top: var(--timeline-center);
+            margin-top: var(--blessthun-baseline);
         }
 
         .event-marker.blessthun:hover {
@@ -637,17 +644,30 @@
         }
 
         .event-marker.youth {
-            top: 50%;
-            margin-top: 10px; /* ← sweet spot */
+            top: var(--timeline-center);
+            margin-top: var(--youth-baseline);
         }
 
         /* Vertical offsets for multiple different events on same day */
-        .event-marker.blessthun.v-offset-1 { margin-top: -28px; }
-        .event-marker.blessthun.v-offset-2 { margin-top: -46px; }
-        .event-marker.blessthun.v-offset-3 { margin-top: -64px; }
-        .event-marker.youth.v-offset-1 { margin-top: 28px; }
-        .event-marker.youth.v-offset-2 { margin-top: 46px; }
-        .event-marker.youth.v-offset-3 { margin-top: 64px; }
+        .event-marker.blessthun.v-offset-1 {
+            margin-top: calc(var(--blessthun-baseline) - var(--stack-gap));
+        }
+        .event-marker.blessthun.v-offset-2 {
+            margin-top: calc(var(--blessthun-baseline) - var(--stack-gap) * 2);
+        }
+        .event-marker.blessthun.v-offset-3 {
+            margin-top: calc(var(--blessthun-baseline) - var(--stack-gap) * 3);
+        }
+        /*Same for Youth*/
+        .event-marker.youth.v-offset-1 {
+            margin-top: calc(var(--youth-baseline) + var(--stack-gap));
+        }
+        .event-marker.youth.v-offset-2 {
+            margin-top: calc(var(--youth-baseline) + var(--stack-gap) * 2);
+        }
+        .event-marker.youth.v-offset-3 {
+            margin-top: calc(var(--youth-baseline) + var(--stack-gap) * 3);
+        }
 
         .event-dot {
             width: 14px;
@@ -736,8 +756,11 @@
         }
 
         .secondary-event.blessthun {
-            top: 2px;
-            transform: translate(-50%, calc(-50% - 12px));
+            top: var(--timeline-center);
+            transform: translate(
+                -50%,
+                calc(-50% + var(--blessthun-baseline))
+            );
         }
 
         .secondary-event.blessthun:hover {
@@ -745,8 +768,11 @@
         }
 
         .secondary-event.youth {
-            top: 2px;
-            transform: translate(-50%, calc(-50% + 16px));
+            top: var(--timeline-center);
+            transform: translate(
+                -50%,
+                calc(-50% + var(--youth-baseline))
+            );
         }
 
         .secondary-event.youth:hover {
@@ -754,12 +780,43 @@
         }
 
         /* Vertical offsets for multiple different secondary events on same day */
-        .secondary-event.blessthun.v-offset-1 { transform: translate(-50%, calc(-50% - 24px)); }
-        .secondary-event.blessthun.v-offset-2 { transform: translate(-50%, calc(-50% - 36px)); }
-        .secondary-event.blessthun.v-offset-3 { transform: translate(-50%, calc(-50% - 48px)); }
-        .secondary-event.youth.v-offset-1 { transform: translate(-50%, calc(-50% + 28px)); }
-        .secondary-event.youth.v-offset-2 { transform: translate(-50%, calc(-50% + 40px)); }
-        .secondary-event.youth.v-offset-3 { transform: translate(-50%, calc(-50% + 52px)); }
+        .secondary-event.blessthun.v-offset-1 {
+            transform: translate(
+                -50%,
+                calc(-50% + var(--blessthun-baseline) - var(--stack-gap))
+            );
+        }
+        .secondary-event.blessthun.v-offset-2 {
+            transform: translate(
+                -50%,
+                calc(-50% + var(--blessthun-baseline) - var(--stack-gap) * 2)
+            );
+        }
+        .secondary-event.blessthun.v-offset-3 {
+            transform: translate(
+                -50%,
+                calc(-50% + var(--blessthun-baseline) - var(--stack-gap) * 3)
+            );
+        }
+        /*Same for youth*/
+        .secondary-event.youth.v-offset-1 {
+            transform: translate(
+                -50%,
+                calc(-50% + var(--youth-baseline) + var(--stack-gap))
+            );
+        }
+        .secondary-event.youth.v-offset-2 {
+            transform: translate(
+                -50%,
+                calc(-50% + var(--youth-baseline) + var(--stack-gap) * 2)
+            );
+        }
+        .secondary-event.youth.v-offset-3 {
+            transform: translate(
+                -50%,
+                calc(-50% + var(--youth-baseline) + var(--stack-gap) * 3)
+            );
+        }
         
         .secondary-event.blessthun.v-offset-1:hover { transform: translate(-50%, calc(-50% - 24px)) scale(1.3); }
         .secondary-event.blessthun.v-offset-2:hover { transform: translate(-50%, calc(-50% - 36px)) scale(1.3); }
@@ -811,14 +868,18 @@
 
         .multiday-pill.blessthun {
             background: var(--salmon);
-            top: 2px;
-            transform: translateY(calc(-50% - 12px));
+            top: var(--timeline-center);
+            transform: translateY(
+                calc(-50% + var(--blessthun-baseline))
+            );
         }
 
         .multiday-pill.youth {
             background: var(--mint);
-            top: 2px;
-            transform: translateY(calc(-50% + 16px));
+            top: var(--timeline-center);
+            transform: translateY(
+                calc(-50% + var(--youth-baseline))
+            );
         }
 
         .multiday-label {
