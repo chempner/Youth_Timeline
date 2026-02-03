@@ -918,8 +918,86 @@
             align-items: center;
             gap: 0.4rem;
             color: var(--text-secondary);
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
             font-size: 0.9rem;
+        }
+
+        .modal-time {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .modal-location {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.4rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .modal-location svg {
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .modal-same-day {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .same-day-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .same-day-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .same-day-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            background: var(--bg);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .same-day-item:hover {
+            background: var(--border);
+        }
+
+        .same-day-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .same-day-dot.blessthun { background: var(--salmon); }
+        .same-day-dot.youth { background: var(--mint); }
+
+        .same-day-name {
+            flex: 1;
+        }
+
+        .same-day-time {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
         }
 
         .modal-actions {
@@ -1479,6 +1557,22 @@
                 </svg>
                 <span id="modal-date-text">January 15, 2026</span>
             </div>
+            <div class="modal-time" id="modal-time" style="display: none;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/>
+                </svg>
+                <span id="modal-time-text">19:00 - 23:00</span>
+            </div>
+            <div class="modal-location" id="modal-location" style="display: none;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
+                </svg>
+                <span id="modal-location-text"></span>
+            </div>
+            <div class="modal-same-day" id="modal-same-day" style="display: none;">
+                <div class="same-day-label">Also on this day:</div>
+                <div class="same-day-list" id="same-day-list"></div>
+            </div>
             <div class="modal-actions">
                 <button class="btn btn-success" onclick="addToCalendar()">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1629,6 +1723,7 @@
         }
 
         function formatDateStr(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+        function formatTimeStr(d) { return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; }
 
         function parseIcal(data) {
             const evts = [], lines = data.split(/\r?\n/);
@@ -1643,7 +1738,18 @@
                         if (cur.endIsAllDay && end !== cur.startDate) {
                             const ed = new Date(end+'T12:00:00'); ed.setDate(ed.getDate()-1); end = formatDateStr(ed);
                         }
-                        evts.push({ id: Date.now()+Math.random(), date: cur.startDate, startDate: cur.startDate, endDate: end, name: cur.name, isMultiDay: end !== cur.startDate });
+                        evts.push({ 
+                            id: Date.now()+Math.random(), 
+                            date: cur.startDate, 
+                            startDate: cur.startDate, 
+                            endDate: end, 
+                            name: cur.name, 
+                            isMultiDay: end !== cur.startDate,
+                            startTime: cur.startTime,
+                            endTime: cur.endTime,
+                            isAllDay: cur.startIsAllDay,
+                            location: cur.location
+                        });
                     }
                     cur = null;
                 } else if (cur) {
@@ -1651,9 +1757,24 @@
                     if (ci > 0) {
                         const key = line.slice(0,ci), val = line.slice(ci+1);
                         const isDateOnly = key.includes('VALUE=DATE') && !key.includes('DATE-TIME');
-                        if (key.startsWith('DTSTART')) { const p = parseICalDate(val); if(p) { cur.startDate = formatDateStr(p); cur.startIsAllDay = isDateOnly || val.length===8; } }
-                        else if (key.startsWith('DTEND')) { const p = parseICalDate(val); if(p) { cur.endDate = formatDateStr(p); cur.endIsAllDay = isDateOnly || val.length===8; } }
+                        if (key.startsWith('DTSTART')) { 
+                            const p = parseICalDate(val); 
+                            if(p) { 
+                                cur.startDate = formatDateStr(p); 
+                                cur.startIsAllDay = isDateOnly || val.length===8;
+                                if (!cur.startIsAllDay) cur.startTime = formatTimeStr(p);
+                            } 
+                        }
+                        else if (key.startsWith('DTEND')) { 
+                            const p = parseICalDate(val); 
+                            if(p) { 
+                                cur.endDate = formatDateStr(p); 
+                                cur.endIsAllDay = isDateOnly || val.length===8;
+                                if (!cur.endIsAllDay) cur.endTime = formatTimeStr(p);
+                            } 
+                        }
                         else if (key === 'SUMMARY') cur.name = val;
+                        else if (key === 'LOCATION') cur.location = val.replace(/\\,/g, ',').replace(/\\;/g, ';');
                     }
                 }
             }
@@ -1900,10 +2021,60 @@
             const badge = document.getElementById('modal-badge');
             badge.textContent = type === 'blessthun' ? 'BlessThun' : 'Youth Revival';
             badge.className = `modal-badge ${type}`;
+            
+            // Date
             const sd = new Date((e.startDate||e.date)+'T12:00:00');
             let dateText = sd.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
             if (e.endDate && e.endDate !== e.startDate) dateText += ' - ' + new Date(e.endDate+'T12:00:00').toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
             document.getElementById('modal-date-text').textContent = dateText;
+            
+            // Time
+            const timeEl = document.getElementById('modal-time');
+            const timeText = document.getElementById('modal-time-text');
+            if (e.startTime && !e.isAllDay) {
+                let timeStr = e.startTime;
+                if (e.endTime) timeStr += ' – ' + e.endTime;
+                timeText.textContent = timeStr;
+                timeEl.style.display = 'flex';
+            } else {
+                timeEl.style.display = 'none';
+            }
+            
+            // Location
+            const locEl = document.getElementById('modal-location');
+            const locText = document.getElementById('modal-location-text');
+            if (e.location) {
+                locText.textContent = e.location;
+                locEl.style.display = 'flex';
+            } else {
+                locEl.style.display = 'none';
+            }
+            
+            // Other events on same day
+            const sameDayEl = document.getElementById('modal-same-day');
+            const sameDayList = document.getElementById('same-day-list');
+            const eventDate = e.startDate || e.date;
+            const allEvents = [...getAllEvents('blessthun'), ...getAllEvents('youth')];
+            const otherEvents = allEvents.filter(ev => 
+                (ev.startDate === eventDate || ev.date === eventDate) && 
+                ev.name !== e.name
+            );
+            
+            if (otherEvents.length > 0) {
+                sameDayList.innerHTML = otherEvents.map(ev => {
+                    const evType = ev.type;
+                    const timeStr = ev.startTime ? ev.startTime : 'All day';
+                    return `<div class="same-day-item" onclick="openModal(${JSON.stringify(ev).replace(/"/g, '&quot;')}, '${evType}')">
+                        <span class="same-day-dot ${evType}"></span>
+                        <span class="same-day-name">${ev.name}</span>
+                        <span class="same-day-time">${timeStr}</span>
+                    </div>`;
+                }).join('');
+                sameDayEl.style.display = 'block';
+            } else {
+                sameDayEl.style.display = 'none';
+            }
+            
             document.getElementById('event-modal').classList.add('active');
         }
 
