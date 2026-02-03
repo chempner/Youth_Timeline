@@ -25,8 +25,12 @@ const ELVANTO_JSON = {
         calendarId: '60a53343-8476-4ccd-8b1b-729f8ce7c5b8',
         baseUrl: 'https://blessthun.elvanto.eu/calendar/load.php'
     },
-    team: {
+    blessthun_team: {
         calendarId: '2b2b16bb-5f53-49db-bd4e-d58815b5239b',
+        baseUrl: 'https://blessthun.elvanto.eu/calendar/load.php'
+    },
+    youth_team: {
+        calendarId: 'acaf434d-c2c0-41da-8403-73b1e3fabf92',
         baseUrl: 'https://blessthun.elvanto.eu/calendar/load.php'
     }
 };
@@ -254,14 +258,15 @@ async function fetchAllCalendars() {
     const results = {
         blessthun: await fetchCalendar('blessthun', 'blessthun.ics'),
         youth: await fetchCalendar('youth', 'youth.ics'),
-        team: await fetchCalendar('team', 'team.ics'),
+        blessthun_team: await fetchCalendar('blessthun_team', 'blessthun_team.ics'),
+        youth_team: await fetchCalendar('youth_team', 'youth_team.ics'),
         timestamp: new Date().toISOString()
     };
     
     config.lastFetch = results.timestamp;
     saveConfig(config);
     
-    console.log(`[${results.timestamp}] Fetch complete: blessthun=${results.blessthun}, youth=${results.youth}, team=${results.team}\n`);
+    console.log(`[${results.timestamp}] Fetch complete: blessthun=${results.blessthun}, youth=${results.youth}, blessthun_team=${results.blessthun_team}, youth_team=${results.youth_team}\n`);
     return results;
 }
 
@@ -289,7 +294,8 @@ app.get('/api/status', (req, res) => {
         hasUrls: {
             blessthun: true,
             youth: true,
-            team: true
+            blessthun_team: true,
+            youth_team: true
         }
     });
 });

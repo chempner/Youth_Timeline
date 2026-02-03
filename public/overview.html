@@ -121,12 +121,10 @@
         .toggle-btn.active { color: white; }
         .toggle-btn.blessthun.active { background: var(--salmon); }
         .toggle-btn.youth.active { background: var(--mint); }
-        .toggle-btn.team.active { background: #6366F1; }
 
         .toggle-dot { width: 10px; height: 10px; border-radius: 50%; }
         .toggle-btn.blessthun .toggle-dot { background: var(--salmon); }
         .toggle-btn.youth .toggle-dot { background: var(--mint); }
-        .toggle-btn.team .toggle-dot { background: #6366F1; }
         .toggle-btn.active .toggle-dot { background: white; }
 
         .year-select {
@@ -217,7 +215,6 @@
         .calendar-title .dot { width: 14px; height: 14px; border-radius: 50%; }
         .calendar-title .dot.blessthun { background: var(--salmon); }
         .calendar-title .dot.youth { background: var(--mint); }
-        .calendar-title .dot.team { background: #6366F1; }
 
         .calendar-year { font-size: 22px; font-weight: 900; color: var(--paper-text); }
 
@@ -341,10 +338,6 @@
                     <span class="toggle-dot"></span>
                     Youth Revival
                 </button>
-                <button class="toggle-btn team" onclick="setCalendar('team')">
-                    <span class="toggle-dot"></span>
-                    Teamkalender
-                </button>
             </div>
 
             <select class="year-select" id="year-select" onchange="setYear(this.value)"></select>
@@ -454,9 +447,24 @@
         async function loadCalendar() {
             document.getElementById('content').innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading calendar...</p></div>';
             try {
-                const res = await fetch(`/calendars/${currentCalendar}.ics?t=${Date.now()}`);
-                if (!res.ok) throw new Error();
-                events = parseICS(await res.text());
+                // Load main calendar
+                const mainRes = await fetch(`/calendars/${currentCalendar}.ics?t=${Date.now()}`);
+                if (!mainRes.ok) throw new Error();
+                const mainEvents = parseICS(await mainRes.text());
+                
+                // Load team calendar
+                let teamEvents = [];
+                try {
+                    const teamRes = await fetch(`/calendars/${currentCalendar}_team.ics?t=${Date.now()}`);
+                    if (teamRes.ok) {
+                        teamEvents = parseICS(await teamRes.text());
+                        // Mark team events
+                        teamEvents.forEach(e => e.isTeamEvent = true);
+                    }
+                } catch { /* Team calendar optional */ }
+                
+                // Combine events
+                events = [...mainEvents, ...teamEvents];
                 filterAndRender();
             } catch { document.getElementById('content').innerHTML = '<div class="loading"><p>Failed to load. <button class="btn" onclick="loadCalendar()">Retry</button></p></div>'; }
         }
@@ -527,8 +535,7 @@
         function renderCalendar(filtered) {
             const names = {
                 blessthun: 'BLESSTHUN EVENTS',
-                youth: 'YOUTH REVIVAL EVENTS',
-                team: 'TEAMKALENDER EVENTS'
+                youth: 'YOUTH REVIVAL EVENTS'
             };
             const name = names[currentCalendar] || 'EVENTS';
             const monthsHtml = MONTHS.map((m, i) => {
