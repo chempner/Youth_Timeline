@@ -408,8 +408,8 @@
             position: absolute;
             left: 0;
             right: 0;
-            top: 50%;
-            transform: translateY(-50%);
+            top: 0;
+            bottom: 0;
             pointer-events: none;
             z-index: 5;
         }
@@ -429,12 +429,12 @@
             padding: 0 6px;
             overflow: visible;
             top: 50%;
-            transform: translateY(-50%);
+            margin-top: -9px;
         }
 
-        .holiday-strip.row-1 { transform: translateY(calc(-50% - 22px)); }
-        .holiday-strip.row-2 { transform: translateY(calc(-50% - 44px)); }
-        .holiday-strip.row-3 { transform: translateY(calc(-50% - 66px)); }
+        .holiday-strip.row-1 { margin-top: -31px; }
+        .holiday-strip.row-2 { margin-top: -53px; }
+        .holiday-strip.row-3 { margin-top: -75px; }
 
         .holiday-strip-label {
             color: white;
@@ -738,7 +738,7 @@
         .secondary-event.blessthun {
             top: 50%;
             transform: translate(-50%, -100%);
-            margin-top: -12px;
+            margin-top: -16px;
         }
 
         .secondary-event.blessthun:hover {
@@ -747,16 +747,16 @@
 
         .secondary-event.youth {
             top: 50%;
-            margin-top: 12px;
+            margin-top: 20px;
         }
 
         /* Vertical offsets for multiple different secondary events on same day */
-        .secondary-event.blessthun.v-offset-1 { margin-top: -24px; }
-        .secondary-event.blessthun.v-offset-2 { margin-top: -36px; }
-        .secondary-event.blessthun.v-offset-3 { margin-top: -48px; }
-        .secondary-event.youth.v-offset-1 { margin-top: 24px; }
-        .secondary-event.youth.v-offset-2 { margin-top: 36px; }
-        .secondary-event.youth.v-offset-3 { margin-top: 48px; }
+        .secondary-event.blessthun.v-offset-1 { margin-top: -28px; }
+        .secondary-event.blessthun.v-offset-2 { margin-top: -40px; }
+        .secondary-event.blessthun.v-offset-3 { margin-top: -52px; }
+        .secondary-event.youth.v-offset-1 { margin-top: 32px; }
+        .secondary-event.youth.v-offset-2 { margin-top: 44px; }
+        .secondary-event.youth.v-offset-3 { margin-top: 56px; }
 
         .event-square {
             width: 8px;
@@ -802,13 +802,13 @@
         .multiday-pill.blessthun {
             background: var(--salmon);
             top: 50%;
-            transform: translateY(-20px);
+            transform: translateY(-24px);
         }
 
         .multiday-pill.youth {
             background: var(--mint);
             top: 50%;
-            transform: translateY(12px);
+            transform: translateY(20px);
         }
 
         .multiday-label {
@@ -830,12 +830,12 @@
 
         .multiday-label.blessthun-type {
             bottom: 50%;
-            margin-bottom: 12px;
+            margin-bottom: 16px;
         }
 
         .multiday-label.youth-type {
             top: 50%;
-            margin-top: 12px;
+            margin-top: 16px;
             flex-direction: column-reverse;
         }
 
