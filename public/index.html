@@ -629,27 +629,37 @@
         }
 
         .event-marker.blessthun {
-            top: 50%;
-            transform: translate(-50%, -100%);
-            margin-top: -4px;
+            top: 2px;
+            transform: translate(-50%, calc(var(--blessthun-offset) - 10px));
         }
 
         .event-marker.blessthun:hover {
-            transform: translate(-50%, -100%) scale(1.2);
+            transform: translate(-50%, calc(var(--blessthun-offset) - 10px)) scale(1.2);
         }
 
         .event-marker.youth {
-            top: 50%;
-            margin-top: 4px;
+            top: 2px;
+            transform: translate(-50%, calc(var(--youth-offset) - 10px));
+        }
+
+        .event-marker.youth:hover {
+            transform: translate(-50%, calc(var(--youth-offset) - 10px)) scale(1.2);
         }
 
         /* Vertical offsets for multiple different events on same day */
-        .event-marker.blessthun.v-offset-1 { margin-top: -22px; }
-        .event-marker.blessthun.v-offset-2 { margin-top: -40px; }
-        .event-marker.blessthun.v-offset-3 { margin-top: -58px; }
-        .event-marker.youth.v-offset-1 { margin-top: 22px; }
-        .event-marker.youth.v-offset-2 { margin-top: 40px; }
-        .event-marker.youth.v-offset-3 { margin-top: 58px; }
+        .event-marker.blessthun.v-offset-1 { transform: translate(-50%, calc(var(--blessthun-offset) - 10px - 18px)); }
+        .event-marker.blessthun.v-offset-2 { transform: translate(-50%, calc(var(--blessthun-offset) - 10px - 36px)); }
+        .event-marker.blessthun.v-offset-3 { transform: translate(-50%, calc(var(--blessthun-offset) - 10px - 54px)); }
+        .event-marker.youth.v-offset-1 { transform: translate(-50%, calc(var(--youth-offset) - 10px + 18px)); }
+        .event-marker.youth.v-offset-2 { transform: translate(-50%, calc(var(--youth-offset) - 10px + 36px)); }
+        .event-marker.youth.v-offset-3 { transform: translate(-50%, calc(var(--youth-offset) - 10px + 54px)); }
+
+        .event-marker.blessthun.v-offset-1:hover { transform: translate(-50%, calc(var(--blessthun-offset) - 10px - 18px)) scale(1.2); }
+        .event-marker.blessthun.v-offset-2:hover { transform: translate(-50%, calc(var(--blessthun-offset) - 10px - 36px)) scale(1.2); }
+        .event-marker.blessthun.v-offset-3:hover { transform: translate(-50%, calc(var(--blessthun-offset) - 10px - 54px)) scale(1.2); }
+        .event-marker.youth.v-offset-1:hover { transform: translate(-50%, calc(var(--youth-offset) - 10px + 18px)) scale(1.2); }
+        .event-marker.youth.v-offset-2:hover { transform: translate(-50%, calc(var(--youth-offset) - 10px + 36px)) scale(1.2); }
+        .event-marker.youth.v-offset-3:hover { transform: translate(-50%, calc(var(--youth-offset) - 10px + 54px)) scale(1.2); }
 
         .event-dot {
             width: 14px;
