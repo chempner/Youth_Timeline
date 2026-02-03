@@ -411,45 +411,71 @@
             top: 50%;
             transform: translateY(-50%);
             pointer-events: none;
+            z-index: 50;
         }
 
         .holiday-strip {
             position: absolute;
-            height: 22px;
-            background: linear-gradient(135deg, rgba(167, 139, 250, 0.85), rgba(139, 92, 246, 0.85));
-            border-radius: 4px;
-            z-index: 8;
+            height: 18px;
+            background: linear-gradient(135deg, #A78BFA, #8B5CF6);
+            border-radius: 3px;
+            z-index: 50;
             pointer-events: auto;
             cursor: default;
-            box-shadow: 0 2px 4px rgba(139, 92, 246, 0.3);
+            box-shadow: 0 2px 4px rgba(139, 92, 246, 0.4);
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
+            padding: 0 6px;
+            overflow: visible;
         }
 
-        .holiday-strip.row-0 { top: -11px; }
-        .holiday-strip.row-1 { top: -35px; }
-        .holiday-strip.row-2 { top: -59px; }
-        .holiday-strip.row-3 { top: -83px; }
+        .holiday-strip.row-0 { top: -9px; }
+        .holiday-strip.row-1 { top: -29px; }
+        .holiday-strip.row-2 { top: -49px; }
+        .holiday-strip.row-3 { top: -69px; }
 
         .holiday-strip-label {
             color: white;
             font-size: 0.65rem;
-            font-weight: 600;
+            font-weight: 700;
             white-space: nowrap;
-            padding: 0 6px;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5), 0 0 2px rgba(0,0,0,0.3);
             overflow: hidden;
             text-overflow: ellipsis;
+            max-width: 100%;
+            letter-spacing: 0.02em;
+        }
+
+        .holiday-strip-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1E293B;
+            color: white;
+            padding: 0.3rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            margin-bottom: 4px;
+            z-index: 1000;
+        }
+
+        .holiday-strip:hover .holiday-strip-tooltip {
+            opacity: 1;
         }
 
         [data-theme="dark"] .holiday-strip {
-            background: linear-gradient(135deg, rgba(167, 139, 250, 0.9), rgba(139, 92, 246, 0.9));
+            background: linear-gradient(135deg, #A78BFA, #8B5CF6);
         }
 
         .holiday-strip.past {
-            opacity: 0.45;
+            opacity: 0.4;
         }
 
         .timeline-track {
@@ -2749,6 +2775,7 @@
 
                 html += `<div class="holiday-strip${pastClass}${rowClass}" style="left:${h.startPos}%;width:${width}%">
                     <span class="holiday-strip-label">${h.name}</span>
+                    <div class="holiday-strip-tooltip">${h.name}</div>
                 </div>`;
             });
 
