@@ -685,10 +685,6 @@
             color: #1E293B;
         }
 
-        .event-square {
-            position: relative;
-        }
-
         .event-tooltip {
             position: absolute;
             left: 50%;
@@ -725,16 +721,16 @@
         /* Secondary Events */
         .secondary-event {
             position: absolute;
-            transform: translateX(-50%);
             pointer-events: auto;
             cursor: pointer;
             z-index: 8;
             transition: transform 0.2s ease;
+            width: 12px;
+            height: 12px;
         }
 
         .secondary-event:hover {
             z-index: 100;
-            transform: translateX(-50%) scale(1.3);
         }
 
         .secondary-event.blessthun {
@@ -804,8 +800,8 @@
         /* Multi-day */
         .multiday-pill {
             position: absolute;
-            height: 8px;
-            border-radius: 4px;
+            height: 12px;
+            border-radius: 6px;
             z-index: 11;
             pointer-events: none;
             box-shadow: 0 1px 3px rgba(0,0,0,0.15);
@@ -2450,7 +2446,7 @@
                 const vOffset = e.verticalOffset || 0;
                 const offsetStyle = vOffset > 0 ? ` v-offset-${Math.min(vOffset, 3)}` : '';
                 const edgeClass = e.position < 8 ? ' tooltip-right' : e.position > 92 ? ' tooltip-left' : '';
-                html += `<div class="secondary-event ${e.type}${pastClass}${offsetStyle}${edgeClass}" style="left:${e.position}%" onclick='openModal(${JSON.stringify(e).replace(/'/g,"&#39;")}, "${e.type}")'><div class="event-tooltip">${e.month} ${e.day}: ${e.name||'Event'}</div><div class="event-square ${e.type}"></div></div>`;
+                html += `<div class="secondary-event ${e.type}${pastClass}${offsetStyle}${edgeClass}" style="left:${e.position}%" onclick='openModal(${JSON.stringify(e).replace(/'/g,"&#39;")}, "${e.type}")'><div class="event-square ${e.type}"></div><div class="event-tooltip">${e.month} ${e.day}: ${e.name||'Event'}</div></div>`;
             });
             
             groupedPrimary.forEach(e => {
