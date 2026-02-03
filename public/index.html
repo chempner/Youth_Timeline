@@ -26,13 +26,11 @@
             --shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
             --today: #3B82F6;
 
-            /* Timeline geometry */
-            --timeline-center: 50%;
             --stack-gap: 18px;
 
-            /* Visual baselines (tuned by eye) */
-            --youth-baseline: 11px;        /* below center */
-            --blessthun-baseline: -11px;   /* above center */
+            /* vertical offsets from timeline center */
+            --youth-offset: 10px;
+            --blessthun-offset: -10px;
         }
 
         [data-theme="dark"] {
@@ -622,7 +620,9 @@
 
         .event-marker {
             position: absolute;
-            transform: translateX(-50%);
+            transform:
+                translateX(-50%)
+                translateY(var(--event-y, 0px));
             pointer-events: auto;
             cursor: pointer;
             z-index: 10;
@@ -635,8 +635,8 @@
         }
 
         .event-marker.blessthun {
-            top: var(--timeline-center);
-            margin-top: var(--blessthun-baseline);
+            top: 50%;
+            --event-y: var(--blessthun-offset);
         }
 
         .event-marker.blessthun:hover {
@@ -644,29 +644,29 @@
         }
 
         .event-marker.youth {
-            top: var(--timeline-center);
-            margin-top: var(--youth-baseline);
+            top: 50%;
+            --event-y: var(--youth-offset);
         }
 
         /* Vertical offsets for multiple different events on same day */
         .event-marker.blessthun.v-offset-1 {
-            margin-top: calc(var(--blessthun-baseline) - var(--stack-gap));
+            --event-y: calc(var(--blessthun-offset) - var(--stack-gap));
         }
         .event-marker.blessthun.v-offset-2 {
-            margin-top: calc(var(--blessthun-baseline) - var(--stack-gap) * 2);
+            --event-y: calc(var(--blessthun-offset) - var(--stack-gap) * 2);
         }
         .event-marker.blessthun.v-offset-3 {
-            margin-top: calc(var(--blessthun-baseline) - var(--stack-gap) * 3);
+            --event-y: calc(var(--blessthun-offset) - var(--stack-gap) * 3);
         }
         /*Same for Youth*/
         .event-marker.youth.v-offset-1 {
-            margin-top: calc(var(--youth-baseline) + var(--stack-gap));
+            --event-y: calc(var(--youth-offset) + var(--stack-gap));
         }
         .event-marker.youth.v-offset-2 {
-            margin-top: calc(var(--youth-baseline) + var(--stack-gap) * 2);
+            --event-y: calc(var(--youth-offset) + var(--stack-gap) * 2);
         }
         .event-marker.youth.v-offset-3 {
-            margin-top: calc(var(--youth-baseline) + var(--stack-gap) * 3);
+            --event-y: calc(var(--youth-offset) + var(--stack-gap) * 3);
         }
 
         .event-dot {
@@ -864,22 +864,19 @@
             z-index: 11;
             pointer-events: none;
             box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+
+            top: 50%;
+            transform: translateY(var(--event-y, 0px));
         }
 
         .multiday-pill.blessthun {
             background: var(--salmon);
-            top: var(--timeline-center);
-            transform: translateY(
-                calc(-50% + var(--blessthun-baseline))
-            );
+            --event-y: var(--blessthun-offset);
         }
 
         .multiday-pill.youth {
             background: var(--mint);
-            top: var(--timeline-center);
-            transform: translateY(
-                calc(-50% + var(--youth-baseline))
-            );
+            --event-y: var(--youth-offset);
         }
 
         .multiday-label {
