@@ -2693,8 +2693,20 @@
 
             const todayStr = formatDateStr(new Date());
             const yearHolidays = holidays.filter(h => {
-                const startYear = parseInt((h.startDate || h.date).slice(0, 4));
-                const endYear = h.endDate ? parseInt(h.endDate.slice(0, 4)) : startYear;
+                // Filter out Ramadan
+                if (h.name && h.name.toLowerCase().includes('ramadan')) return false;
+                
+                // Only multi-day events (>2 days)
+                const startDate = h.startDate || h.date;
+                const endDate = h.endDate || startDate;
+                const start = new Date(startDate + 'T12:00:00');
+                const end = new Date(endDate + 'T12:00:00');
+                const days = Math.round((end - start) / (1000 * 60 * 60 * 24)) + 1;
+                if (days < 2) return false;
+                
+                // Check if in this year
+                const startYear = parseInt(startDate.slice(0, 4));
+                const endYear = parseInt(endDate.slice(0, 4));
                 return startYear === year || endYear === year || (startYear < year && endYear > year);
             });
 
