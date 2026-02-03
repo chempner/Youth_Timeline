@@ -1910,11 +1910,27 @@
         }
 
         function initYearPickers() {
-            const s1 = document.getElementById('year1-select'), s2 = document.getElementById('year2-select');
-            YEAR_RANGE.forEach(y => {
-                s1.innerHTML += `<option value="${y}" ${y===currentYear1?'selected':''}>${y}</option>`;
-                s2.innerHTML += `<option value="${y}" ${y===currentYear2?'selected':''}>${y}</option>`;
-            });
+            const s1 = document.getElementById('year1-select');
+            const s2 = document.getElementById('year2-select');
+            if (!s1 || !s2) return;
+            
+            s1.innerHTML = '';
+            s2.innerHTML = '';
+            
+            for (let i = 0; i < YEAR_RANGE.length; i++) {
+                const y = YEAR_RANGE[i];
+                const opt1 = document.createElement('option');
+                opt1.value = y;
+                opt1.textContent = y;
+                if (y === currentYear1) opt1.selected = true;
+                s1.appendChild(opt1);
+                
+                const opt2 = document.createElement('option');
+                opt2.value = y;
+                opt2.textContent = y;
+                if (y === currentYear2) opt2.selected = true;
+                s2.appendChild(opt2);
+            }
         }
 
         function changeYear(t, y) {
@@ -2173,7 +2189,6 @@
                 let dateStr = sd.toLocaleDateString(locale, { month:'short', day:'numeric', year:'numeric' });
                 if (e.endDate && e.endDate !== e.startDate) dateStr += ' - ' + new Date(e.endDate+'T12:00:00').toLocaleDateString(locale, { month:'short', day:'numeric' });
                 return `<div class="events-list-item" onclick='openModal(${JSON.stringify(e).replace(/'/g,"&#39;")}, "${type}")'><span class="events-list-name">${e.name}</span><span class="events-list-date">${dateStr}</span></div>`;
-            }).join('');
             }).join('');
         }
 
