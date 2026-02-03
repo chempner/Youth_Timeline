@@ -611,6 +611,19 @@
         .event-marker.youth .event-tooltip { top: 100%; margin-top: 6px; }
         .event-marker:hover .event-tooltip { opacity: 1; }
 
+        /* Edge tooltip positioning - align to left/right instead of center */
+        .event-marker.tooltip-right .event-tooltip,
+        .secondary-event.tooltip-right .event-tooltip {
+            left: 0;
+            transform: none;
+        }
+        .event-marker.tooltip-left .event-tooltip,
+        .secondary-event.tooltip-left .event-tooltip {
+            left: auto;
+            right: 0;
+            transform: none;
+        }
+
         /* Secondary Events */
         .secondary-event {
             position: absolute;
@@ -2093,19 +2106,19 @@
             groupedSecondary.forEach(e => {
                 const isPast = (e.displayDate || e.startDate || e.date) < todayStr;
                 const pastClass = isPast ? ' past' : '';
-                const countBadge = e.occurrences.length > 1 ? `<span class="event-count-badge">${e.occurrences.length}</span>` : '';
                 const vOffset = e.verticalOffset || 0;
                 const offsetStyle = vOffset > 0 ? ` v-offset-${Math.min(vOffset, 3)}` : '';
-                html += `<div class="secondary-event ${e.type}${pastClass}${offsetStyle}" style="left:${e.position}%" onclick='openModal(${JSON.stringify(e).replace(/'/g,"&#39;")}, "${e.type}")'><div class="event-tooltip">${e.month} ${e.day}: ${e.name||'Event'}${e.occurrences.length > 1 ? ` (${e.occurrences.length}×)` : ''}</div><div class="event-square ${e.type}">${countBadge}</div></div>`;
+                const edgeClass = e.position < 8 ? ' tooltip-right' : e.position > 92 ? ' tooltip-left' : '';
+                html += `<div class="secondary-event ${e.type}${pastClass}${offsetStyle}${edgeClass}" style="left:${e.position}%" onclick='openModal(${JSON.stringify(e).replace(/'/g,"&#39;")}, "${e.type}")'><div class="event-tooltip">${e.month} ${e.day}: ${e.name||'Event'}</div><div class="event-square ${e.type}"></div></div>`;
             });
             
             groupedPrimary.forEach(e => {
                 const isPast = (e.startDate || e.date) < todayStr;
                 const pastClass = isPast ? ' past' : '';
-                const countBadge = e.occurrences.length > 1 ? `<span class="event-count-badge">${e.occurrences.length}</span>` : '';
                 const vOffset = e.verticalOffset || 0;
                 const offsetStyle = vOffset > 0 ? ` v-offset-${Math.min(vOffset, 3)}` : '';
-                html += `<div class="event-marker ${e.type}${pastClass}${offsetStyle}" style="left:${e.position}%" onclick='openModal(${JSON.stringify(e).replace(/'/g,"&#39;")}, "${e.type}")'><div class="event-tooltip">${e.month} ${e.day}: ${e.name||'Event'}${e.occurrences.length > 1 ? ` (${e.occurrences.length}×)` : ''}</div><div class="event-dot ${e.type}">${countBadge}</div></div>`;
+                const edgeClass = e.position < 8 ? ' tooltip-right' : e.position > 92 ? ' tooltip-left' : '';
+                html += `<div class="event-marker ${e.type}${pastClass}${offsetStyle}${edgeClass}" style="left:${e.position}%" onclick='openModal(${JSON.stringify(e).replace(/'/g,"&#39;")}, "${e.type}")'><div class="event-tooltip">${e.month} ${e.day}: ${e.name||'Event'}</div><div class="event-dot ${e.type}"></div></div>`;
             });
 
             container.innerHTML = html;
