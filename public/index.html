@@ -25,8 +25,8 @@
             --border: #E5E7EB;
             --shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
             --today: #3B82F6;
-            --blessthun-offset: -19px;
-            --youth-offset: 19px;
+            --blessthun-offset: -18px;
+            --youth-offset: 18px;
         }
 
         [data-theme="dark"] {
@@ -352,6 +352,7 @@
 
         .timeline-scroll-container {
             overflow-x: auto;
+            overflow-y: visible;
             -webkit-overflow-scrolling: touch;
             scrollbar-width: thin;
             scrollbar-color: var(--border) transparent;
@@ -467,8 +468,19 @@
             pointer-events: none;
             transition: opacity 0.2s ease, visibility 0.2s ease;
             margin-bottom: 4px;
-            z-index: 1000;
+            z-index: 2000;
             text-align: center;
+        }
+
+        .holiday-strip.tooltip-right .holiday-strip-tooltip {
+            left: 0;
+            transform: translateX(0);
+        }
+
+        .holiday-strip.tooltip-left .holiday-strip-tooltip {
+            left: auto;
+            right: 0;
+            transform: translateX(0);
         }
 
         .holiday-strip-tooltip .tooltip-dates {
@@ -478,7 +490,7 @@
         }
 
         .holiday-strip:hover {
-            z-index: 6;
+            z-index: 2000;
         }
 
         .holiday-strip:hover .holiday-strip-tooltip {
@@ -860,6 +872,46 @@
 
         .multiday-label.youth-type:hover {
             transform: translateX(-50%) translateY(calc(var(--youth-offset) - 4px)) scale(1.05);
+        }
+
+        /* Edge handling for multiday labels */
+        .multiday-label.label-right {
+            transform: translateX(0);
+        }
+        .multiday-label.label-left {
+            transform: translateX(-100%);
+        }
+        .multiday-label.blessthun-type.label-right {
+            transform: translateX(0) translateY(calc(var(--blessthun-offset) - 4px - 100%));
+        }
+        .multiday-label.blessthun-type.label-left {
+            transform: translateX(-100%) translateY(calc(var(--blessthun-offset) - 4px - 100%));
+        }
+        .multiday-label.youth-type.label-right {
+            transform: translateX(0) translateY(calc(var(--youth-offset) - 4px));
+        }
+        .multiday-label.youth-type.label-left {
+            transform: translateX(-100%) translateY(calc(var(--youth-offset) - 4px));
+        }
+        .multiday-label.blessthun-type.label-right:hover {
+            transform: translateX(0) translateY(calc(var(--blessthun-offset) - 4px - 100%)) scale(1.05);
+        }
+        .multiday-label.blessthun-type.label-left:hover {
+            transform: translateX(-100%) translateY(calc(var(--blessthun-offset) - 4px - 100%)) scale(1.05);
+        }
+        .multiday-label.youth-type.label-right:hover {
+            transform: translateX(0) translateY(calc(var(--youth-offset) - 4px)) scale(1.05);
+        }
+        .multiday-label.youth-type.label-left:hover {
+            transform: translateX(-100%) translateY(calc(var(--youth-offset) - 4px)) scale(1.05);
+        }
+
+        /* Connector alignment for edge labels */
+        .multiday-label.label-right {
+            align-items: flex-start;
+        }
+        .multiday-label.label-left {
+            align-items: flex-end;
         }
 
         .multiday-label .event-connector {
@@ -2444,8 +2496,9 @@
                 const center = e.startPosition + width/2;
                 const isPast = (e.endDate || e.startDate) < todayStr;
                 const pastClass = isPast ? ' past' : '';
+                const edgeClass = center < 8 ? ' label-right' : center > 92 ? ' label-left' : '';
                 html += `<div class="multiday-pill ${e.type}${pastClass}" style="left:${e.startPosition}%;width:${width}%"></div>`;
-                html += `<div class="multiday-label ${e.type}-type${e.offset?` offset-${e.offset}`:''}${pastClass}" style="left:${center}%" onclick='openModal(${JSON.stringify(e).replace(/'/g,"&#39;")}, "${e.type}")'><div class="event-label"><span class="event-month">${e.dateDisplay}</span><span class="event-name">${e.name||'Event'}</span></div><div class="event-connector"></div></div>`;
+                html += `<div class="multiday-label ${e.type}-type${e.offset?` offset-${e.offset}`:''}${pastClass}${edgeClass}" style="left:${center}%" onclick='openModal(${JSON.stringify(e).replace(/'/g,"&#39;")}, "${e.type}")'><div class="event-label"><span class="event-month">${e.dateDisplay}</span><span class="event-name">${e.name||'Event'}</span></div><div class="event-connector"></div></div>`;
             });
             
             groupedSecondary.forEach(e => {
@@ -2829,6 +2882,10 @@
                 const pastClass = isPast ? ' past' : '';
                 const rowClass = h.row > 0 ? ` row-${h.row}` : '';
                 
+                // Edge detection for tooltip positioning
+                const centerPos = h.startPos + width / 2;
+                const edgeClass = centerPos < 10 ? ' tooltip-right' : centerPos > 90 ? ' tooltip-left' : '';
+                
                 // Format dates for tooltip
                 const startD = new Date(h.startDate + 'T12:00:00');
                 const endD = new Date(h.endDate + 'T12:00:00');
@@ -2836,7 +2893,7 @@
                 const endStr = endD.toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' });
                 const dateRange = `${startStr} – ${endStr}`;
 
-                html += `<div class="holiday-strip${pastClass}${rowClass}" style="left:${h.startPos}%;width:${width}%">
+                html += `<div class="holiday-strip${pastClass}${rowClass}${edgeClass}" style="left:${h.startPos}%;width:${width}%">
                     <span class="holiday-strip-label">${h.name}</span>
                     <div class="holiday-strip-tooltip">
                         <div>${h.name}</div>
