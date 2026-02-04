@@ -25,8 +25,8 @@
             --border: #E5E7EB;
             --shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
             --today: #3B82F6;
-            --blessthun-offset: -18px;
-            --youth-offset: 18px;
+            --blessthun-offset: -19px;
+            --youth-offset: 19px;
         }
 
         [data-theme="dark"] {
@@ -462,12 +462,12 @@
             font-size: 0.7rem;
             font-weight: 500;
             white-space: nowrap;
-            opacity: 1;
+            opacity: 0;
             visibility: hidden;
             pointer-events: none;
             transition: opacity 0.2s ease, visibility 0.2s ease;
             margin-bottom: 4px;
-            z-index: 1001;
+            z-index: 1000;
             text-align: center;
         }
 
@@ -478,7 +478,7 @@
         }
 
         .holiday-strip:hover {
-            z-index: 10;
+            z-index: 6;
         }
 
         .holiday-strip:hover .holiday-strip-tooltip {
