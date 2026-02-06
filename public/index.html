@@ -690,6 +690,33 @@
         .event-dot.blessthun { background: var(--salmon); }
         .event-dot.youth { background: var(--mint); }
 
+        /* Special events styling */
+        .event-marker.special .event-dot,
+        .secondary-event.special .event-square {
+            border-color: #FFD700;
+            box-shadow: 0 0 8px rgba(255, 215, 0, 0.6), 0 2px 6px rgba(0,0,0,0.15);
+        }
+
+        .multiday-pill.special {
+            box-shadow: 0 0 8px rgba(255, 215, 0, 0.6), 0 1px 3px rgba(0,0,0,0.15);
+            border: 2px solid #FFD700;
+            margin-top: -2px;
+        }
+
+        .multiday-label.special .event-label {
+            border-left-color: #FFD700 !important;
+            border-left-width: 4px !important;
+            box-shadow: 0 0 8px rgba(255, 215, 0, 0.4), var(--shadow);
+        }
+
+        .multiday-label.special .event-label::after {
+            content: '⭐';
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            font-size: 10px;
+        }
+
         .event-count-badge {
             position: absolute;
             top: -6px;
@@ -896,6 +923,7 @@
             border-radius: 6px;
             max-width: 110px;
             transition: all 0.2s ease;
+            position: relative;
         }
 
         .multiday-label.blessthun-type .event-label {
@@ -1086,13 +1114,29 @@
 
         .modal-close:hover { color: var(--text-primary); }
 
+        .modal-badges {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
         .modal-badge {
             display: inline-block;
             padding: 0.2rem 0.6rem;
             border-radius: 10px;
             font-size: 0.7rem;
             font-weight: 600;
-            margin-bottom: 0.75rem;
+        }
+
+        .modal-special {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #1a1a1a;
         }
 
         .modal-badge.blessthun {
@@ -1135,6 +1179,25 @@
         .modal-location svg {
             flex-shrink: 0;
             margin-top: 2px;
+        }
+
+        .modal-description {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.4rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .modal-description svg {
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        #modal-description-text {
+            white-space: pre-wrap;
+            word-break: break-word;
         }
 
         .modal-same-day {
@@ -1748,7 +1811,10 @@
                 <h2 class="modal-title" id="modal-title">Event Name</h2>
                 <button class="modal-close" onclick="closeModal()">&times;</button>
             </div>
-            <span class="modal-badge" id="modal-badge">BlessThun</span>
+            <div class="modal-badges">
+                <span class="modal-badge" id="modal-badge">BlessThun</span>
+                <span class="modal-special" id="modal-special" style="display: none;">⭐ Spezial</span>
+            </div>
             <div class="modal-date" id="modal-date">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
@@ -1766,6 +1832,12 @@
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
                 </svg>
                 <span id="modal-location-text"></span>
+            </div>
+            <div class="modal-description" id="modal-description" style="display: none;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10,9 9,9 8,9"/>
+                </svg>
+                <span id="modal-description-text"></span>
             </div>
             <div class="modal-same-day" id="modal-same-day" style="display: none;">
                 <div class="same-day-label">Also on this day:</div>
@@ -2174,7 +2246,9 @@
                             startTime: cur.startTime,
                             endTime: cur.endTime,
                             isAllDay: cur.startIsAllDay,
-                            location: cur.location
+                            location: cur.location,
+                            description: cur.description,
+                            isSpecial: cur.description && cur.description.toLowerCase().includes('spezial')
                         });
                     }
                     cur = null;
@@ -2203,6 +2277,7 @@
                         }
                         else if (key === 'SUMMARY') cur.name = val;
                         else if (key === 'LOCATION') cur.location = val.replace(/\\,/g, ',').replace(/\\;/g, ';');
+                        else if (key === 'DESCRIPTION') cur.description = val.replace(/\\n/g, '\n').replace(/\\,/g, ',').replace(/\\;/g, ';');
                     }
                 }
             }
@@ -2461,26 +2536,29 @@
                 const center = e.startPosition + width/2;
                 const isPast = (e.endDate || e.startDate) < todayStr;
                 const pastClass = isPast ? ' past' : '';
-                html += `<div class="multiday-pill ${e.type}${pastClass}" style="left:${e.startPosition}%;width:${width}%"></div>`;
-                html += `<div class="multiday-label ${e.type}-type${e.offset?` offset-${e.offset}`:''}${pastClass}" style="left:${center}%" onclick='openModal(${JSON.stringify(e).replace(/'/g,"&#39;")}, "${e.type}")'><div class="event-label"><span class="event-month">${e.dateDisplay}</span><span class="event-name">${e.name||'Event'}</span></div><div class="event-connector"></div></div>`;
+                const specialClass = e.isSpecial ? ' special' : '';
+                html += `<div class="multiday-pill ${e.type}${pastClass}${specialClass}" style="left:${e.startPosition}%;width:${width}%"></div>`;
+                html += `<div class="multiday-label ${e.type}-type${e.offset?` offset-${e.offset}`:''}${pastClass}${specialClass}" style="left:${center}%" onclick='openModal(${JSON.stringify(e).replace(/'/g,"&#39;")}, "${e.type}")'><div class="event-label"><span class="event-month">${e.dateDisplay}</span><span class="event-name">${e.name||'Event'}</span></div><div class="event-connector"></div></div>`;
             });
             
             groupedSecondary.forEach(e => {
                 const isPast = (e.displayDate || e.startDate || e.date) < todayStr;
                 const pastClass = isPast ? ' past' : '';
+                const specialClass = e.isSpecial ? ' special' : '';
                 const vOffset = e.verticalOffset || 0;
                 const offsetStyle = vOffset > 0 ? ` v-offset-${Math.min(vOffset, 3)}` : '';
                 const edgeClass = e.position < 8 ? ' tooltip-right' : e.position > 92 ? ' tooltip-left' : '';
-                html += `<div class="secondary-event ${e.type}${pastClass}${offsetStyle}${edgeClass}" style="left:${e.position}%" onclick='openModal(${JSON.stringify(e).replace(/'/g,"&#39;")}, "${e.type}")'><div class="event-square ${e.type}"></div><div class="event-tooltip">${e.month} ${e.day}: ${e.name||'Event'}</div></div>`;
+                html += `<div class="secondary-event ${e.type}${pastClass}${specialClass}${offsetStyle}${edgeClass}" style="left:${e.position}%" onclick='openModal(${JSON.stringify(e).replace(/'/g,"&#39;")}, "${e.type}")'><div class="event-square ${e.type}"></div><div class="event-tooltip">${e.month} ${e.day}: ${e.name||'Event'}</div></div>`;
             });
             
             groupedPrimary.forEach(e => {
                 const isPast = (e.startDate || e.date) < todayStr;
                 const pastClass = isPast ? ' past' : '';
+                const specialClass = e.isSpecial ? ' special' : '';
                 const vOffset = e.verticalOffset || 0;
                 const offsetStyle = vOffset > 0 ? ` v-offset-${Math.min(vOffset, 3)}` : '';
                 const edgeClass = e.position < 8 ? ' tooltip-right' : e.position > 92 ? ' tooltip-left' : '';
-                html += `<div class="event-marker ${e.type}${pastClass}${offsetStyle}${edgeClass}" style="left:${e.position}%" onclick='openModal(${JSON.stringify(e).replace(/'/g,"&#39;")}, "${e.type}")'><div class="event-tooltip">${e.month} ${e.day}: ${e.name||'Event'}</div><div class="event-dot ${e.type}"></div></div>`;
+                html += `<div class="event-marker ${e.type}${pastClass}${specialClass}${offsetStyle}${edgeClass}" style="left:${e.position}%" onclick='openModal(${JSON.stringify(e).replace(/'/g,"&#39;")}, "${e.type}")'><div class="event-tooltip">${e.month} ${e.day}: ${e.name||'Event'}</div><div class="event-dot ${e.type}"></div></div>`;
             });
 
             container.innerHTML = html;
@@ -2516,6 +2594,10 @@
             const badge = document.getElementById('modal-badge');
             badge.textContent = type === 'blessthun' ? 'BlessThun' : 'Youth Revival';
             badge.className = `modal-badge ${type}`;
+            
+            // Special badge
+            const specialBadge = document.getElementById('modal-special');
+            specialBadge.style.display = e.isSpecial ? 'inline-block' : 'none';
             
             // Date
             const sd = new Date((e.startDate||e.date)+'T12:00:00');
@@ -2557,6 +2639,24 @@
                 locEl.style.display = 'flex';
             } else {
                 locEl.style.display = 'none';
+            }
+            
+            // Description
+            const descEl = document.getElementById('modal-description');
+            const descText = document.getElementById('modal-description-text');
+            let description = e.description;
+            if (!description && e.occurrences) {
+                description = e.occurrences.find(o => o.description)?.description;
+            }
+            // Filter out the "spezial" marker from display
+            if (description) {
+                description = description.replace(/spezial/gi, '').trim();
+            }
+            if (description) {
+                descText.textContent = description;
+                descEl.style.display = 'flex';
+            } else {
+                descEl.style.display = 'none';
             }
             
             // Other events on same day (different names only)
