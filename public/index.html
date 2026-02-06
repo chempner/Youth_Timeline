@@ -942,14 +942,22 @@
             transform: translateX(-50%) translateY(calc(var(--youth-offset) - 4px)) scale(1.05);
         }
 
-        /* Edge handling - shift label box to stay visible, connector stays centered */
+        /* Edge handling - shift label box to stay visible, connector stays attached */
         .multiday-label.edge-left .event-label {
-            position: relative;
-            left: 40px;
+            margin-left: 35px;
+        }
+        .multiday-label.edge-left .event-connector {
+            margin-left: 17px;
+            transform: rotate(15deg);
+            height: 24px;
         }
         .multiday-label.edge-right .event-label {
-            position: relative;
-            right: 40px;
+            margin-right: 35px;
+        }
+        .multiday-label.edge-right .event-connector {
+            margin-right: 17px;
+            transform: rotate(-15deg);
+            height: 24px;
         }
 
         .multiday-label .event-connector {
