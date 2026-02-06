@@ -697,6 +697,42 @@
             box-shadow: 0 0 8px rgba(255, 215, 0, 0.6), 0 2px 6px rgba(0,0,0,0.15);
         }
 
+        /* Make special event squares same size as primary event dots */
+        .secondary-event.special .event-square {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border-width: 3px;
+        }
+
+        /* Adjust special secondary-event positioning to account for larger size */
+        .secondary-event.special.blessthun {
+            transform: translate(-50%, calc(var(--blessthun-offset) - 7px));
+        }
+        .secondary-event.special.blessthun:hover {
+            transform: translate(-50%, calc(var(--blessthun-offset) - 7px)) scale(1.3);
+        }
+        .secondary-event.special.youth {
+            transform: translate(-50%, calc(var(--youth-offset) - 7px));
+        }
+        .secondary-event.special.youth:hover {
+            transform: translate(-50%, calc(var(--youth-offset) - 7px)) scale(1.3);
+        }
+
+        /* V-offset rules for special events */
+        .secondary-event.special.blessthun.v-offset-1 { transform: translate(-50%, calc(var(--blessthun-offset) - 7px - 12px)); }
+        .secondary-event.special.blessthun.v-offset-2 { transform: translate(-50%, calc(var(--blessthun-offset) - 7px - 24px)); }
+        .secondary-event.special.blessthun.v-offset-3 { transform: translate(-50%, calc(var(--blessthun-offset) - 7px - 36px)); }
+        .secondary-event.special.youth.v-offset-1 { transform: translate(-50%, calc(var(--youth-offset) - 7px + 12px)); }
+        .secondary-event.special.youth.v-offset-2 { transform: translate(-50%, calc(var(--youth-offset) - 7px + 24px)); }
+        .secondary-event.special.youth.v-offset-3 { transform: translate(-50%, calc(var(--youth-offset) - 7px + 36px)); }
+        .secondary-event.special.blessthun.v-offset-1:hover { transform: translate(-50%, calc(var(--blessthun-offset) - 7px - 12px)) scale(1.3); }
+        .secondary-event.special.blessthun.v-offset-2:hover { transform: translate(-50%, calc(var(--blessthun-offset) - 7px - 24px)) scale(1.3); }
+        .secondary-event.special.blessthun.v-offset-3:hover { transform: translate(-50%, calc(var(--blessthun-offset) - 7px - 36px)) scale(1.3); }
+        .secondary-event.special.youth.v-offset-1:hover { transform: translate(-50%, calc(var(--youth-offset) - 7px + 12px)) scale(1.3); }
+        .secondary-event.special.youth.v-offset-2:hover { transform: translate(-50%, calc(var(--youth-offset) - 7px + 24px)) scale(1.3); }
+        .secondary-event.special.youth.v-offset-3:hover { transform: translate(-50%, calc(var(--youth-offset) - 7px + 36px)) scale(1.3); }
+
         .multiday-pill.special {
             box-shadow: 0 0 8px rgba(255, 215, 0, 0.6), 0 1px 3px rgba(0,0,0,0.15);
             border: 2px solid #FFD700;
@@ -2533,11 +2569,16 @@
                 // Calculate actual width, with a small minimum (1% ≈ 3-4 days)
                 const rawWidth = e.endPosition - e.startPosition;
                 const width = Math.max(rawWidth, 1);
-                const center = e.startPosition + width/2;
+                // Clamp center to keep label within bounds (assume label needs ~4% on each side)
+                const rawCenter = e.startPosition + width/2;
+                const center = Math.max(4, Math.min(96, rawCenter));
                 const isPast = (e.endDate || e.startDate) < todayStr;
                 const pastClass = isPast ? ' past' : '';
                 const specialClass = e.isSpecial ? ' special' : '';
-                html += `<div class="multiday-pill ${e.type}${pastClass}${specialClass}" style="left:${e.startPosition}%;width:${width}%"></div>`;
+                // Clamp pill position too
+                const pillLeft = Math.max(0, e.startPosition);
+                const pillWidth = Math.min(100 - pillLeft, width);
+                html += `<div class="multiday-pill ${e.type}${pastClass}${specialClass}" style="left:${pillLeft}%;width:${pillWidth}%"></div>`;
                 html += `<div class="multiday-label ${e.type}-type${e.offset?` offset-${e.offset}`:''}${pastClass}${specialClass}" style="left:${center}%" onclick='openModal(${JSON.stringify(e).replace(/'/g,"&#39;")}, "${e.type}")'><div class="event-label"><span class="event-month">${e.dateDisplay}</span><span class="event-name">${e.name||'Event'}</span></div><div class="event-connector"></div></div>`;
             });
             
@@ -2941,13 +2982,17 @@
             let html = '';
             const locale = currentLang === 'de' ? 'de-CH' : 'en-US';
             holidaysWithPos.forEach(h => {
-                const width = Math.max(h.width, 1);
+                const rawWidth = Math.max(h.width, 1);
                 const isPast = h.endDate < todayStr;
                 const pastClass = isPast ? ' past' : '';
                 const rowClass = h.row > 0 ? ` row-${h.row}` : '';
                 
+                // Clamp positions to timeline bounds
+                const stripLeft = Math.max(0, h.startPos);
+                const stripWidth = Math.min(100 - stripLeft, rawWidth);
+                
                 // Edge detection for tooltip positioning
-                const centerPos = h.startPos + width / 2;
+                const centerPos = stripLeft + stripWidth / 2;
                 const edgeClass = centerPos < 10 ? ' tooltip-right' : centerPos > 90 ? ' tooltip-left' : '';
                 
                 // Format dates for tooltip
@@ -2957,7 +3002,7 @@
                 const endStr = endD.toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' });
                 const dateRange = `${startStr} – ${endStr}`;
 
-                html += `<div class="holiday-strip${pastClass}${rowClass}${edgeClass}" style="left:${h.startPos}%;width:${width}%">
+                html += `<div class="holiday-strip${pastClass}${rowClass}${edgeClass}" style="left:${stripLeft}%;width:${stripWidth}%">
                     <span class="holiday-strip-label">${h.name}</span>
                     <div class="holiday-strip-tooltip">
                         <div>${h.name}</div>
