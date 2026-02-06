@@ -942,6 +942,16 @@
             transform: translateX(-50%) translateY(calc(var(--youth-offset) - 4px)) scale(1.05);
         }
 
+        /* Edge handling - shift label box to stay visible, connector stays centered */
+        .multiday-label.edge-left .event-label {
+            position: relative;
+            left: 40px;
+        }
+        .multiday-label.edge-right .event-label {
+            position: relative;
+            right: 40px;
+        }
+
         .multiday-label .event-connector {
             width: 2px;
             height: 22px;
@@ -2569,16 +2579,18 @@
                 // Calculate actual width, with a small minimum (1% ≈ 3-4 days)
                 const rawWidth = e.endPosition - e.startPosition;
                 const width = Math.max(rawWidth, 1);
-                // Use actual center for label so connector reaches pill
+                // Use actual center for connector alignment
                 const center = e.startPosition + width/2;
                 const isPast = (e.endDate || e.startDate) < todayStr;
                 const pastClass = isPast ? ' past' : '';
                 const specialClass = e.isSpecial ? ' special' : '';
+                // Edge detection - shift label box but keep connector centered
+                const edgeClass = center < 6 ? ' edge-left' : center > 94 ? ' edge-right' : '';
                 // Clamp pill position to timeline bounds
                 const pillLeft = Math.max(0, e.startPosition);
                 const pillWidth = Math.min(100 - pillLeft, width);
                 html += `<div class="multiday-pill ${e.type}${pastClass}${specialClass}" style="left:${pillLeft}%;width:${pillWidth}%"></div>`;
-                html += `<div class="multiday-label ${e.type}-type${e.offset?` offset-${e.offset}`:''}${pastClass}${specialClass}" style="left:${center}%" onclick='openModal(${JSON.stringify(e).replace(/'/g,"&#39;")}, "${e.type}")'><div class="event-label"><span class="event-month">${e.dateDisplay}</span><span class="event-name">${e.name||'Event'}</span></div><div class="event-connector"></div></div>`;
+                html += `<div class="multiday-label ${e.type}-type${e.offset?` offset-${e.offset}`:''}${pastClass}${specialClass}${edgeClass}" style="left:${center}%" onclick='openModal(${JSON.stringify(e).replace(/'/g,"&#39;")}, "${e.type}")'><div class="event-label"><span class="event-month">${e.dateDisplay}</span><span class="event-name">${e.name||'Event'}</span></div><div class="event-connector"></div></div>`;
             });
             
             groupedSecondary.forEach(e => {
