@@ -415,6 +415,7 @@
             height: 100%;
             pointer-events: none;
             z-index: 5;
+            overflow: visible;
         }
 
         .holiday-strip {
@@ -468,7 +469,7 @@
             pointer-events: none;
             transition: opacity 0.2s ease, visibility 0.2s ease;
             margin-bottom: 4px;
-            z-index: 2000;
+            z-index: 9999;
             text-align: center;
         }
 
@@ -491,6 +492,10 @@
 
         .holiday-strip:hover {
             z-index: 2000;
+        }
+
+        .holidays-container:has(.holiday-strip:hover) {
+            z-index: 9999;
         }
 
         .holiday-strip:hover .holiday-strip-tooltip {
@@ -872,46 +877,6 @@
 
         .multiday-label.youth-type:hover {
             transform: translateX(-50%) translateY(calc(var(--youth-offset) - 4px)) scale(1.05);
-        }
-
-        /* Edge handling for multiday labels */
-        .multiday-label.label-right {
-            transform: translateX(0);
-        }
-        .multiday-label.label-left {
-            transform: translateX(-100%);
-        }
-        .multiday-label.blessthun-type.label-right {
-            transform: translateX(0) translateY(calc(var(--blessthun-offset) - 4px - 100%));
-        }
-        .multiday-label.blessthun-type.label-left {
-            transform: translateX(-100%) translateY(calc(var(--blessthun-offset) - 4px - 100%));
-        }
-        .multiday-label.youth-type.label-right {
-            transform: translateX(0) translateY(calc(var(--youth-offset) - 4px));
-        }
-        .multiday-label.youth-type.label-left {
-            transform: translateX(-100%) translateY(calc(var(--youth-offset) - 4px));
-        }
-        .multiday-label.blessthun-type.label-right:hover {
-            transform: translateX(0) translateY(calc(var(--blessthun-offset) - 4px - 100%)) scale(1.05);
-        }
-        .multiday-label.blessthun-type.label-left:hover {
-            transform: translateX(-100%) translateY(calc(var(--blessthun-offset) - 4px - 100%)) scale(1.05);
-        }
-        .multiday-label.youth-type.label-right:hover {
-            transform: translateX(0) translateY(calc(var(--youth-offset) - 4px)) scale(1.05);
-        }
-        .multiday-label.youth-type.label-left:hover {
-            transform: translateX(-100%) translateY(calc(var(--youth-offset) - 4px)) scale(1.05);
-        }
-
-        /* Connector alignment for edge labels */
-        .multiday-label.label-right {
-            align-items: flex-start;
-        }
-        .multiday-label.label-left {
-            align-items: flex-end;
         }
 
         .multiday-label .event-connector {
@@ -2496,9 +2461,8 @@
                 const center = e.startPosition + width/2;
                 const isPast = (e.endDate || e.startDate) < todayStr;
                 const pastClass = isPast ? ' past' : '';
-                const edgeClass = center < 8 ? ' label-right' : center > 92 ? ' label-left' : '';
                 html += `<div class="multiday-pill ${e.type}${pastClass}" style="left:${e.startPosition}%;width:${width}%"></div>`;
-                html += `<div class="multiday-label ${e.type}-type${e.offset?` offset-${e.offset}`:''}${pastClass}${edgeClass}" style="left:${center}%" onclick='openModal(${JSON.stringify(e).replace(/'/g,"&#39;")}, "${e.type}")'><div class="event-label"><span class="event-month">${e.dateDisplay}</span><span class="event-name">${e.name||'Event'}</span></div><div class="event-connector"></div></div>`;
+                html += `<div class="multiday-label ${e.type}-type${e.offset?` offset-${e.offset}`:''}${pastClass}" style="left:${center}%" onclick='openModal(${JSON.stringify(e).replace(/'/g,"&#39;")}, "${e.type}")'><div class="event-label"><span class="event-month">${e.dateDisplay}</span><span class="event-name">${e.name||'Event'}</span></div><div class="event-connector"></div></div>`;
             });
             
             groupedSecondary.forEach(e => {
