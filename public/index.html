@@ -2569,13 +2569,12 @@
                 // Calculate actual width, with a small minimum (1% ≈ 3-4 days)
                 const rawWidth = e.endPosition - e.startPosition;
                 const width = Math.max(rawWidth, 1);
-                // Clamp center to keep label within bounds (assume label needs ~4% on each side)
-                const rawCenter = e.startPosition + width/2;
-                const center = Math.max(4, Math.min(96, rawCenter));
+                // Use actual center for label so connector reaches pill
+                const center = e.startPosition + width/2;
                 const isPast = (e.endDate || e.startDate) < todayStr;
                 const pastClass = isPast ? ' past' : '';
                 const specialClass = e.isSpecial ? ' special' : '';
-                // Clamp pill position too
+                // Clamp pill position to timeline bounds
                 const pillLeft = Math.max(0, e.startPosition);
                 const pillWidth = Math.min(100 - pillLeft, width);
                 html += `<div class="multiday-pill ${e.type}${pastClass}${specialClass}" style="left:${pillLeft}%;width:${pillWidth}%"></div>`;
